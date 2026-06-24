@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Songbook",
+    "slug": "songbook",
+    "version": "0.0.0",
+    "scheme": "songbook",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Songbook usa o microfone para gravar áudios de referência das suas músicas."
+      }
+    },
+    "android": {
+      "permissions": ["RECORD_AUDIO"]
+    },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

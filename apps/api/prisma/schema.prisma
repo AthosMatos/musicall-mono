@@ -1,0 +1,192 @@
+// musicall domain model. See CONTEXT.md for the glossary and docs/adr for decisions.
+// Two things Prisma can't express are added by a raw migration (see
+// prisma/migrations notes): the MediaAsset exactly-one-owner CHECK constraint
+// and the Song.searchVector tsvector column + GIN index for full-text search.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SongStatus {
+  draft
+  in_progress
+  finished
+}
+
+enum CollectionStatus {
+  draft
+  in_progress
+  released
+}
+
+enum CollectionType {
+  album
+  single
+}
+
+enum MediaType {
+  audio
+  image
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  passwordHash  String
+  avatarKey     String?
+  createdAt     DateTime       @default(now())
+  songs         Song[]
+  collections   Collection[]
+  tags          Tag[]
+  refreshTokens RefreshToken[]
+}
+
+model Song {
+  id            String           @id @default(cuid())
+  userId        String
+  title         String
+  status        SongStatus       @default(draft)
+  key           String?
+  bpm           Int?
+  timeSignature String?
+  genre         String?
+  notes         String?
+  isFavorite    Boolean          @default(false)
+  coverMediaId  String?          @unique
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  deletedAt     DateTime?
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cover         MediaAsset?      @relation("SongCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+  lyricVersions LyricVersion[]
+  chordCharts   ChordChart[]
+  tablatures    Tablature[]
+  media         MediaAsset[]     @relation("SongMedia")
+  collections   CollectionSong[]
+  tags          SongTag[]
+
+  @@index([userId, deletedAt])
+}
+
+model LyricVersion {
+  id        String   @id @default(cuid())
+  songId    String
+  label     String
+  content   String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  song      Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@index([songId])
+}
+
+model ChordChart {
+  id        String   @id @default(cuid())
+  songId    String
+  label     String
+  content   String
+  createdAt DateTime @default(now())
+  song      Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@index([songId])
+}
+
+model Tablature {
+  id         String   @id @default(cuid())
+  songId     String
+  label      String
+  content    String
+  instrument String?
+  createdAt  DateTime @default(now())
+  song       Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@index([songId])
+}
+
+model MediaAsset {
+  id                 String      @id @default(cuid())
+  songId             String?
+  collectionId       String?
+  type               MediaType
+  label              String
+  storageKey         String
+  mime               String
+  sizeBytes          Int
+  durationSec        Int?
+  createdAt          DateTime    @default(now())
+  song               Song?       @relation("SongMedia", fields: [songId], references: [id], onDelete: Cascade)
+  collection         Collection? @relation("CollectionMedia", fields: [collectionId], references: [id], onDelete: Cascade)
+  // Back-relations for the cover pointers on Song / Collection (FK lives there).
+  coverOfSong        Song?       @relation("SongCover")
+  coverOfCollection  Collection? @relation("CollectionCover")
+
+  // A raw migration adds: CHECK ((songId IS NOT NULL) <> (collectionId IS NOT NULL))
+  @@index([songId])
+  @@index([collectionId])
+}
+
+model Collection {
+  id           String           @id @default(cuid())
+  userId       String
+  type         CollectionType
+  title        String
+  description  String?
+  status       CollectionStatus @default(draft)
+  coverMediaId String?          @unique
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  deletedAt    DateTime?
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cover        MediaAsset?      @relation("CollectionCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+  media        MediaAsset[]     @relation("CollectionMedia")
+  songs        CollectionSong[]
+
+  @@index([userId, deletedAt])
+}
+
+model CollectionSong {
+  collectionId String
+  songId       String
+  order        Int
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  song         Song       @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, songId])
+  @@index([collectionId, order])
+}
+
+model Tag {
+  id     String    @id @default(cuid())
+  userId String
+  name   String
+  user   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  songs  SongTag[]
+
+  @@unique([userId, name])
+}
+
+model SongTag {
+  songId String
+  tagId  String
+  song   Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([songId, tagId])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
