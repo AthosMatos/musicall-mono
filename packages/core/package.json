@@ -40,6 +40,16 @@
         "types": "./dist/cjs/index.d.ts",
         "default": "./dist/cjs/index.js"
       }
+    },
+    "./api": {
+      "import": {
+        "types": "./dist/es/api.d.mts",
+        "default": "./dist/es/api.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/api.d.ts",
+        "default": "./dist/cjs/api.js"
+      }
     }
   }
 }
