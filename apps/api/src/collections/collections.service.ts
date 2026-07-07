@@ -8,10 +8,12 @@ import type {
   CollectionQuery,
   CreateCollectionInput,
   PaginatedResult,
+  Song as SongResponse,
   UpdateCollectionInput,
 } from '@monorepo/core';
 import { Prisma, type Collection } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { toSongResponse } from '../songs/songs.service';
 import { StorageService } from '../storage/storage.service';
 
 function toResponse(c: Collection): CollectionResponse {
@@ -65,6 +67,17 @@ export class CollectionsService {
 
   async get(userId: string, id: string): Promise<CollectionResponse> {
     return toResponse(await this.requireOwned(userId, id));
+  }
+
+  /** The collection's tracks in playlist order (CollectionSong.order). */
+  async listSongs(userId: string, id: string): Promise<SongResponse[]> {
+    await this.requireOwned(userId, id);
+    const rows = await this.prisma.collectionSong.findMany({
+      where: { collectionId: id, song: { deletedAt: null } },
+      orderBy: { order: 'asc' },
+      include: { song: true },
+    });
+    return rows.map((row) => toSongResponse(row.song));
   }
 
   async create(

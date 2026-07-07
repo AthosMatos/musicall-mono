@@ -1,13 +1,12 @@
-import { Disc3, Heart, Home, Music2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Disc3, Heart, Home, LogOut, Music2 } from "lucide-react";
 import { NavLink, Outlet, useParams } from "react-router-dom";
-import { collections } from "../data/songbook";
+import { collectionsSearchOptions } from "@monorepo/core/api";
+import { useAuth } from "../lib/auth";
+import { collectionTypeLabel } from "../lib/model";
 import { MonoLabel } from "./primitives";
 
-const collectionDot: Record<string, string> = {
-  "mare-ep": "#c25e44",
-  "demos-2025": "#cf9b3f",
-  "folha-seca-single": "#6f8a72",
-};
+const collectionDots = ["#c25e44", "#cf9b3f", "#6f8a72", "#8a8276"];
 
 const navItems = [
   { to: "/", label: "Início", icon: Home },
@@ -24,6 +23,10 @@ function navRowClass(active: boolean): string {
 
 export default function Shell() {
   const { id: activeCollectionId } = useParams();
+  const { user, logout } = useAuth();
+  const collectionsQuery = useQuery(collectionsSearchOptions({ pageSize: 20 }));
+  const collections = collectionsQuery.data?.items ?? [];
+
   return (
     <div className="flex min-h-svh">
       <aside className="flex w-[258px] shrink-0 flex-col border-r border-border bg-bg-deep px-5 py-[26px]">
@@ -43,28 +46,52 @@ export default function Shell() {
           ))}
         </nav>
 
-        <MonoLabel className="px-2 pt-5 pb-[6px]">Coleções</MonoLabel>
-        <nav className="flex flex-col gap-[2px]">
-          {collections.map((c) => (
-            <NavLink
-              key={c.id}
-              to={`/albums/${c.id}`}
-              className={navRowClass(c.id === activeCollectionId)}
-            >
-              <span
-                className="h-2 w-2 shrink-0 rounded-[2px]"
-                style={{ background: collectionDot[c.id] ?? "#6f8a72" }}
-              />
-              <span className={c.id === activeCollectionId ? "" : "text-ink-2"}>
-                {c.typeLabel === "EP" ? `${c.title} · EP` : c.title}
-              </span>
-            </NavLink>
-          ))}
-        </nav>
+        {collections.length > 0 && (
+          <>
+            <MonoLabel className="px-2 pt-5 pb-[6px]">Coleções</MonoLabel>
+            <nav className="flex flex-col gap-[2px]">
+              {collections.map((c, i) => (
+                <NavLink
+                  key={c.id}
+                  to={`/albums/${c.id}`}
+                  className={navRowClass(c.id === activeCollectionId)}
+                >
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-[2px]"
+                    style={{ background: collectionDots[i % collectionDots.length] }}
+                  />
+                  <span className={`truncate ${c.id === activeCollectionId ? "" : "text-ink-2"}`}>
+                    {c.type === "album" ? `${c.title} · ${collectionTypeLabel(c)}` : c.title}
+                  </span>
+                </NavLink>
+              ))}
+            </nav>
+          </>
+        )}
 
-        <div className="mt-auto flex items-center gap-[9px] rounded-[10px] border border-border-alt bg-surface px-[10px] py-[11px]">
-          <span className="h-[7px] w-[7px] rounded-full bg-success" />
-          <span className="font-mono text-xs text-meta">sincronizado · agora</span>
+        <div className="mt-auto flex flex-col gap-2">
+          {user && (
+            <button
+              type="button"
+              onClick={() => void logout()}
+              className="flex cursor-pointer items-center gap-[11px] rounded-[9px] border-none bg-transparent px-[10px] py-[9px] text-left text-sm text-meta hover:text-ink-2"
+            >
+              <LogOut size={15} />
+              <span className="truncate">sair · {user.name}</span>
+            </button>
+          )}
+          <div className="flex items-center gap-[9px] rounded-[10px] border border-border-alt bg-surface px-[10px] py-[11px]">
+            <span
+              className={`h-[7px] w-[7px] rounded-full ${collectionsQuery.isError ? "bg-accent" : "bg-success"}`}
+            />
+            <span className="font-mono text-xs text-meta">
+              {collectionsQuery.isError
+                ? "erro de sincronização"
+                : collectionsQuery.isFetching
+                  ? "sincronizando…"
+                  : "sincronizado · agora"}
+            </span>
+          </div>
         </div>
       </aside>
 

@@ -19,7 +19,9 @@ import {
 import type {
   Collection as CollectionResponse,
   PaginatedResult,
+  Song as SongResponse,
 } from '@monorepo/core';
+import { SongResponseDto } from '../songs/dto/songs.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../common/auth-user';
 import { CollectionsService } from './collections.service';
@@ -77,6 +79,16 @@ export class CollectionsController {
     @Param('id') id: string,
   ): Promise<CollectionResponse> {
     return this.collections.get(user.userId, id);
+  }
+
+  @Get(':id/songs')
+  @ApiOperation({ summary: "List the collection's tracks in playlist order" })
+  @ApiOkResponse({ type: SongResponseDto, isArray: true })
+  listSongs(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+  ): Promise<SongResponse[]> {
+    return this.collections.listSongs(user.userId, id);
   }
 
   @Patch(':id')

@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
-import type { AudioAsset } from "../data/songbook";
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
+import { mediaGetUrl, type MediaAssetResponseDto } from "@monorepo/core/api";
+import { formatDuration, waveformSamples } from "../lib/model";
 
 export function Waveform({
   samples,
@@ -50,34 +45,80 @@ export function Waveform({
   );
 }
 
-/** Mock playback clock — advances progress while "playing". */
-function usePlayback(durationSeconds: number) {
+/**
+ * Streams the asset through an HTMLAudioElement fed by a short-lived signed
+ * URL from `GET /api/media/{id}/url` (ADR-0002 — bytes come from storage).
+ */
+function useAudioPlayback(asset: MediaAssetResponseDto) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [duration, setDuration] = useState(asset.durationSec ?? 0);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!isPlaying) return;
-    timer.current = setInterval(() => {
-      setElapsed((t) => {
-        if (t + 0.25 >= durationSeconds) {
-          setIsPlaying(false);
-          return 0;
-        }
-        return t + 0.25;
-      });
-    }, 250);
     return () => {
-      if (timer.current) clearInterval(timer.current);
+      audioRef.current?.pause();
+      audioRef.current = null;
     };
-  }, [isPlaying, durationSeconds]);
+  }, [asset.id]);
+
+  async function ensureAudio(): Promise<HTMLAudioElement | null> {
+    if (audioRef.current) return audioRef.current;
+    try {
+      const { url } = await mediaGetUrl(asset.id);
+      const audio = new Audio(url);
+      audio.addEventListener("timeupdate", () => setElapsed(audio.currentTime));
+      audio.addEventListener("durationchange", () => {
+        if (Number.isFinite(audio.duration)) setDuration(audio.duration);
+      });
+      audio.addEventListener("ended", () => {
+        setIsPlaying(false);
+        setElapsed(0);
+      });
+      audio.addEventListener("error", () => {
+        setError(true);
+        setIsPlaying(false);
+      });
+      audioRef.current = audio;
+      return audio;
+    } catch {
+      setError(true);
+      return null;
+    }
+  }
+
+  async function toggle() {
+    const audio = await ensureAudio();
+    if (!audio) return;
+    if (audio.paused) {
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch {
+        setError(true);
+      }
+    } else {
+      audio.pause();
+      setIsPlaying(false);
+    }
+  }
+
+  async function seek(fraction: number) {
+    const audio = await ensureAudio();
+    if (!audio || !duration) return;
+    audio.currentTime = fraction * duration;
+    setElapsed(audio.currentTime);
+  }
 
   return {
     isPlaying,
     elapsed,
-    progress: durationSeconds ? elapsed / durationSeconds : 0,
-    toggle: () => setIsPlaying((p) => !p),
-    seek: (fraction: number) => setElapsed(fraction * durationSeconds),
+    duration,
+    error,
+    progress: duration ? elapsed / duration : 0,
+    toggle,
+    seek,
   };
 }
 
@@ -105,18 +146,28 @@ export function PlayButton({
 }
 
 /** Side-panel player card (Song Detail web, frame 4). */
-export function PlayerCard({ audio }: { audio: AudioAsset }) {
-  const playback = usePlayback(audio.durationSeconds);
+export function PlayerCard({ asset }: { asset: MediaAssetResponseDto }) {
+  const playback = useAudioPlayback(asset);
+  const samples = waveformSamples(asset.id);
   return (
     <div className="rounded-card border border-border-alt bg-surface p-[15px]">
       <div className="mb-[13px]">
-        <Waveform samples={audio.samples} progress={playback.progress} height={42} onSeek={playback.seek} />
+        <Waveform
+          samples={samples}
+          progress={playback.progress}
+          height={42}
+          onSeek={(f) => void playback.seek(f)}
+        />
       </div>
       <div className="flex items-center gap-[13px]">
-        <PlayButton isPlaying={playback.isPlaying} onClick={playback.toggle} />
-        <span className="truncate font-mono text-xs text-meta-2">{audio.filename}</span>
+        <PlayButton isPlaying={playback.isPlaying} onClick={() => void playback.toggle()} />
+        <span className="truncate font-mono text-xs text-meta-2">{asset.label}</span>
         <span className="ml-auto font-mono text-xs text-meta-2">
-          {playback.elapsed > 0 ? formatTime(playback.elapsed) : audio.durationLabel}
+          {playback.error
+            ? "erro"
+            : playback.elapsed > 0
+              ? formatDuration(playback.elapsed)
+              : (formatDuration(playback.duration) ?? "—")}
         </span>
       </div>
     </div>

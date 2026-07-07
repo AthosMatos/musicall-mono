@@ -7,5 +7,6 @@
 
 export * from './client.js';
 export * from './upload.js';
+export * from './queries.js';
 export * from './generated/index.js';
 export * from './hooks/index.js';

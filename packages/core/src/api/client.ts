@@ -1,8 +1,10 @@
 /**
- * Platform-agnostic fetch-based API client shared by web and mobile.
+ * Platform-agnostic axios-based API client shared by web and mobile.
  * It knows nothing about React Query / DOM / React Native — callers wrap these
  * methods in TanStack Query (see decision 7 in the plan / ADR-0001).
  */
+
+import axios, { AxiosError, type AxiosInstance } from 'axios';
 
 export interface ApiClientConfig {
   baseUrl: string;
@@ -44,7 +46,14 @@ export interface RequestOptions {
 }
 
 export class ApiClient {
-  constructor(private readonly config: ApiClientConfig) {}
+  private readonly http: AxiosInstance;
+
+  constructor(private readonly config: ApiClientConfig) {
+    this.http = axios.create({
+      baseURL: config.baseUrl.replace(/\/$/, ''),
+      withCredentials: config.withCredentials ?? false,
+    });
+  }
 
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     return this.send<T>(path, options, true);
@@ -55,82 +64,65 @@ export class ApiClient {
     options: RequestOptions,
     allowRefresh: boolean,
   ): Promise<T> {
-    const url = this.buildUrl(path, options.query);
     const headers: Record<string, string> = {};
-    let bodyInit: BodyInit | undefined;
-
-    if (options.body !== undefined) {
-      const isFormData =
-        options.formData ||
-        (typeof FormData !== 'undefined' && options.body instanceof FormData);
-      if (isFormData) {
-        // Pass through untouched; the platform sets the multipart boundary.
-        bodyInit = options.body as BodyInit;
-      } else {
-        headers['Content-Type'] = 'application/json';
-        bodyInit = JSON.stringify(options.body);
-      }
-    }
 
     if (!options.anonymous && this.config.getAccessToken) {
       const token = await this.config.getAccessToken();
       if (token) headers.Authorization = `Bearer ${token}`;
     }
 
-    const res = await fetch(url, {
-      method: options.method ?? 'GET',
-      headers,
-      body: bodyInit,
-      signal: options.signal,
-      credentials: this.config.withCredentials ? 'include' : 'same-origin',
-    });
+    const params = options.query
+      ? Object.fromEntries(
+          Object.entries(options.query).filter(([, v]) => v !== undefined),
+        )
+      : undefined;
 
-    if (
-      res.status === 401 &&
-      allowRefresh &&
-      !options.anonymous &&
-      this.config.refreshAccessToken
-    ) {
-      const refreshed = await this.config.refreshAccessToken();
-      if (refreshed) return this.send<T>(path, options, false);
-    }
-
-    if (!res.ok) {
-      const errorBody = await this.safeJson(res);
-      throw new ApiError(
-        res.status,
-        (errorBody as { message?: string })?.message ?? res.statusText,
-        errorBody,
-      );
-    }
-
-    if (res.status === 204) return undefined as T;
-    return (await this.safeJson(res)) as T;
-  }
-
-  private buildUrl(
-    path: string,
-    query?: RequestOptions['query'],
-  ): string {
-    const base = this.config.baseUrl.replace(/\/$/, '');
-    const url = new URL(`${base}${path.startsWith('/') ? path : `/${path}`}`);
-    if (query) {
-      for (const [key, value] of Object.entries(query)) {
-        if (value !== undefined) url.searchParams.set(key, String(value));
-      }
-    }
-    return url.toString();
-  }
-
-  private async safeJson(res: Response): Promise<unknown> {
-    const text = await res.text();
-    if (!text) return undefined;
     try {
-      return JSON.parse(text);
-    } catch {
-      return text;
+      // axios JSON-serializes plain objects and passes FormData through with
+      // the platform's multipart boundary, so `formData` needs no special path.
+      const res = await this.http.request<T>({
+        url: path,
+        method: options.method ?? 'GET',
+        params,
+        data: options.body,
+        headers,
+        signal: options.signal,
+      });
+      return (res.data === '' ? undefined : res.data) as T;
+    } catch (error) {
+      if (!axios.isAxiosError(error)) throw error;
+
+      const status = error.response?.status;
+      if (
+        status === 401 &&
+        allowRefresh &&
+        !options.anonymous &&
+        this.config.refreshAccessToken
+      ) {
+        const refreshed = await this.config.refreshAccessToken();
+        if (refreshed) return this.send<T>(path, options, false);
+      }
+
+      throw toApiError(error);
     }
   }
+}
+
+function toApiError(error: AxiosError): ApiError {
+  if (error.response) {
+    const body = error.response.data;
+    const message =
+      (body as { message?: string | string[] })?.message ??
+      error.response.statusText ??
+      error.message;
+    return new ApiError(
+      error.response.status,
+      Array.isArray(message) ? message.join('; ') : message,
+      body,
+    );
+  }
+  // Network / timeout / cancel — no HTTP status.
+  return new ApiError(0, error.message);
 }
 
 /**

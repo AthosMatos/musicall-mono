@@ -1,29 +1,50 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, MoreVertical } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import {
+  chordsListOptions,
+  lyricsListOptions,
+  mediaListForSongOptions,
+  songsGetOptions,
+  tabsListOptions,
+} from "@monorepo/core/api";
 import { LyricBody } from "../components/LyricBody";
 import { PlayerCard } from "../components/Player";
 import { MetaChip, MonoLabel, SavedIndicator, StatusPill } from "../components/primitives";
-import { getSong, statusLabel } from "../data/songbook";
+import { shortDate, statusLabel } from "../lib/model";
 
 const tabs = ["Letra", "Cifra", "Tab"] as const;
 type Tab = (typeof tabs)[number];
 
 export default function SongDetailPage() {
-  const { id } = useParams();
-  const song = getSong(id);
+  const { id = "" } = useParams();
   const [activeTab, setActiveTab] = useState<Tab>("Letra");
   const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
 
+  const songQuery = useQuery({ ...songsGetOptions(id), enabled: !!id });
+  const lyricsQuery = useQuery({ ...lyricsListOptions(id), enabled: !!id });
+  const chordsQuery = useQuery({ ...chordsListOptions(id), enabled: !!id && activeTab === "Cifra" });
+  const tabsQuery = useQuery({ ...tabsListOptions(id), enabled: !!id && activeTab === "Tab" });
+  const mediaQuery = useQuery({ ...mediaListForSongOptions(id), enabled: !!id });
+
+  const song = songQuery.data;
+  const versions = lyricsQuery.data?.items ?? [];
+  const audio = (mediaQuery.data?.items ?? []).find((m) => m.type === "audio");
+
+  if (songQuery.isLoading) {
+    return <div className="min-h-svh bg-bg p-10 font-mono text-sm text-faint">carregando…</div>;
+  }
   if (!song) {
-    return <div className="p-10 font-mono text-sm text-meta">música não encontrada</div>;
+    return <div className="min-h-svh bg-bg p-10 font-mono text-sm text-meta">música não encontrada</div>;
   }
 
-  const versions = song.versions;
   const activeVersion =
     versions.find((v) => v.id === activeVersionId) ??
     versions.find((v) => v.isPrimary) ??
     versions[0];
+  const chordChart = chordsQuery.data?.items?.[0];
+  const tablature = tabsQuery.data?.items?.[0];
 
   return (
     <div className="flex min-h-svh flex-col bg-bg">
@@ -70,7 +91,7 @@ export default function SongDetailPage() {
             {activeVersion && (
               <Link to={`/songs/${song.id}/edit`} className="mb-2 no-underline">
                 <MetaChip className="cursor-pointer text-meta">
-                  {activeVersion.label} · {activeVersion.isPrimary ? "atual" : activeVersion.dateLabel} ▾
+                  {activeVersion.label} · {activeVersion.isPrimary ? "atual" : shortDate(activeVersion.createdAt)} ▾
                 </MetaChip>
               </Link>
             )}
@@ -78,20 +99,26 @@ export default function SongDetailPage() {
 
           <div className="min-h-0 flex-1 overflow-y-auto border-t border-border px-8 py-6">
             {activeTab === "Letra" &&
-              (activeVersion ? (
-                <LyricBody sections={activeVersion.sections} fontSize={15} />
+              (lyricsQuery.isLoading ? (
+                <span className="font-mono text-sm text-faint">carregando…</span>
+              ) : activeVersion ? (
+                <LyricBody content={activeVersion.content} fontSize={15} />
               ) : (
                 <EmptyContent label="sem letra ainda" action="escrever letra" to={`/songs/${song.id}/edit`} />
               ))}
             {activeTab === "Cifra" &&
-              (song.chordChart ? (
-                <pre className="m-0 font-mono text-[15px] leading-[2.1] text-lyric">{song.chordChart}</pre>
+              (chordsQuery.isLoading ? (
+                <span className="font-mono text-sm text-faint">carregando…</span>
+              ) : chordChart ? (
+                <pre className="m-0 font-mono text-[15px] leading-[2.1] text-lyric">{chordChart.content}</pre>
               ) : (
                 <EmptyContent label="sem cifra ainda" action="adicionar cifra" />
               ))}
             {activeTab === "Tab" &&
-              (song.tablature ? (
-                <pre className="m-0 font-mono text-[15px] leading-[2.1] text-lyric">{song.tablature}</pre>
+              (tabsQuery.isLoading ? (
+                <span className="font-mono text-sm text-faint">carregando…</span>
+              ) : tablature ? (
+                <pre className="m-0 font-mono text-[15px] leading-[2.1] text-lyric">{tablature.content}</pre>
               ) : (
                 <EmptyContent label="sem tablatura ainda" action="adicionar tab" />
               ))}
@@ -102,8 +129,8 @@ export default function SongDetailPage() {
         <aside className="flex w-[340px] shrink-0 flex-col gap-5 overflow-y-auto bg-bg-deep px-6 py-[22px]">
           <section>
             <MonoLabel className="mb-[11px]">Player</MonoLabel>
-            {song.audio ? (
-              <PlayerCard audio={song.audio} />
+            {audio ? (
+              <PlayerCard asset={audio} />
             ) : (
               <div className="rounded-card border border-dashed border-border-dashed p-[15px] text-center font-mono text-xs text-faint">
                 sem áudio · grave uma ideia
@@ -139,7 +166,9 @@ export default function SongDetailPage() {
                     {version.isPrimary ? (
                       <span className="ml-auto font-mono text-[10px] text-accent-soft">principal</span>
                     ) : (
-                      <span className="ml-auto font-mono text-[11px] text-faint">{version.dateLabel}</span>
+                      <span className="ml-auto font-mono text-[11px] text-faint">
+                        {shortDate(version.createdAt)}
+                      </span>
                     )}
                   </button>
                 );
@@ -150,14 +179,11 @@ export default function SongDetailPage() {
           <section>
             <MonoLabel className="mb-[11px]">Tags</MonoLabel>
             <div className="flex flex-wrap gap-[7px]">
-              {song.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-lg border border-border-alt bg-surface px-[11px] py-[5px] text-xs text-ink-3"
-                >
-                  {tag}
+              {song.genre && (
+                <span className="rounded-lg border border-border-alt bg-surface px-[11px] py-[5px] text-xs text-ink-3">
+                  {song.genre}
                 </span>
-              ))}
+              )}
               <button
                 type="button"
                 className="cursor-pointer rounded-lg border border-dashed border-border-dashed bg-transparent px-[11px] py-[5px] text-xs text-faint"

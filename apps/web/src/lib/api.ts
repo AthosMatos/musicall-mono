@@ -16,7 +16,7 @@ export const api: ApiClient = new ApiClient({
   getAccessToken: () => accessToken,
   refreshAccessToken: async () => {
     try {
-      const tokens = await api.request<AuthTokens>("/auth/refresh", {
+      const tokens = await api.request<AuthTokens>("/api/auth/refresh", {
         method: "POST",
         anonymous: true,
       });

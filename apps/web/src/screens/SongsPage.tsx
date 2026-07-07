@@ -1,23 +1,24 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
 import { Link } from "react-router-dom";
-import { CoverArt, StatusDot, TagChip } from "../components/primitives";
-import { songs, statusLabel } from "../data/songbook";
+import { songsSearchOptions } from "@monorepo/core/api";
+import { CoverArt, StatusDot } from "../components/primitives";
+import { songCover, songMeta, statusLabel } from "../lib/model";
 
 export default function SongsPage({ favoritesOnly = false }: { favoritesOnly?: boolean }) {
   const [query, setQuery] = useState("");
+  const q = query.trim();
 
-  const visible = useMemo(() => {
-    let list = [...songs].sort((a, b) => a.updatedAtRank - b.updatedAtRank);
-    if (favoritesOnly) list = list.filter((s) => s.isFavorite);
-    if (query.trim()) {
-      const q = query.trim().toLowerCase();
-      list = list.filter(
-        (s) => s.title.toLowerCase().includes(q) || s.tags.some((t) => t.toLowerCase().includes(q)),
-      );
-    }
-    return list;
-  }, [favoritesOnly, query]);
+  const songsQuery = useQuery(
+    songsSearchOptions({
+      q: q || undefined,
+      favorite: favoritesOnly || undefined,
+      pageSize: 60,
+    }),
+  );
+  const songs = songsQuery.data?.items ?? [];
+  const total = songsQuery.data?.total ?? 0;
 
   return (
     <>
@@ -27,7 +28,9 @@ export default function SongsPage({ favoritesOnly = false }: { favoritesOnly?: b
             {favoritesOnly ? "Favoritas" : "Todas as músicas"}
           </h1>
           <div className="mt-[3px] font-mono text-xs text-meta-2">
-            {visible.length} música{visible.length === 1 ? "" : "s"} · ordenar por: editadas recentemente ▾
+            {songsQuery.isLoading
+              ? "carregando…"
+              : `${total} música${total === 1 ? "" : "s"} · ordenar por: editadas recentemente ▾`}
           </div>
         </div>
         <label className="flex h-11 w-[300px] items-center gap-[9px] rounded-xl border border-border-strong bg-surface-alt px-[15px]">
@@ -48,8 +51,27 @@ export default function SongsPage({ favoritesOnly = false }: { favoritesOnly?: b
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-9 pt-6">
+        {songsQuery.isError && (
+          <div className="mb-5 flex items-center gap-3 rounded-[10px] border border-[rgba(194,94,68,.35)] bg-[rgba(194,94,68,.1)] px-[13px] py-[10px] font-mono text-xs text-accent-soft">
+            não foi possível carregar as músicas
+            <button
+              type="button"
+              onClick={() => void songsQuery.refetch()}
+              className="cursor-pointer rounded-md border border-[rgba(194,94,68,.35)] bg-transparent px-2 py-1 font-mono text-[11px] text-accent-soft"
+            >
+              tentar de novo
+            </button>
+          </div>
+        )}
+
         <div className="grid grid-cols-3 gap-5">
-          {visible.map((song) => {
+          {songsQuery.isLoading &&
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-[218px] animate-pulse rounded-card border border-border-alt bg-surface" />
+            ))}
+
+          {songs.map((song) => {
+            const cover = songCover(song);
             const untitledDraft = song.status === "draft" && !song.key;
             return (
               <Link
@@ -58,17 +80,13 @@ export default function SongsPage({ favoritesOnly = false }: { favoritesOnly?: b
                 className="flex flex-col gap-[13px] rounded-card border border-border-alt bg-surface p-4 no-underline"
               >
                 <CoverArt
-                  variant={song.cover}
+                  variant={cover}
                   className={`flex h-[120px] rounded-[9px] p-3 ${
-                    song.cover === "none"
-                      ? "items-center justify-center"
-                      : "items-end justify-between"
+                    cover === "none" ? "items-center justify-center" : "items-end justify-between"
                   }`}
                 >
-                  {song.cover === "none" ? (
-                    <span className="font-mono text-[11px] text-faint-2">
-                      {song.audio ? `só áudio · ${song.audio.durationLabel}` : "sem capa"}
-                    </span>
+                  {cover === "none" ? (
+                    <span className="font-mono text-[11px] text-faint-2">rascunho</span>
                   ) : (
                     <>
                       <span className="font-mono text-[11px] text-[#9a8c72]">capa</span>
@@ -81,31 +99,33 @@ export default function SongsPage({ favoritesOnly = false }: { favoritesOnly?: b
                     {song.title}
                   </div>
                   <div className={`mt-[3px] font-mono text-xs ${untitledDraft ? "text-faint" : "text-meta-2"}`}>
-                    {untitledDraft
-                      ? statusLabel[song.status]
-                      : `${song.key} · ${song.bpm} BPM · ${statusLabel[song.status]}`}
+                    {song.key && song.bpm
+                      ? `${song.key} · ${song.bpm} BPM · ${statusLabel[song.status]}`
+                      : statusLabel[song.status]}
                   </div>
                 </div>
-                {song.tags.length > 0 && (
+                {song.genre && (
                   <div className="flex gap-[6px]">
-                    {song.tags.map((tag) => (
-                      <TagChip key={tag}>{tag}</TagChip>
-                    ))}
+                    <span className="rounded-md border border-border-strong px-2 py-[2px] text-[11px] text-meta">
+                      {song.genre}
+                    </span>
                   </div>
                 )}
               </Link>
             );
           })}
 
-          <Link
-            to="/songs/new"
-            className="flex min-h-[218px] flex-col items-center justify-center gap-[10px] rounded-card border border-dashed border-border-dashed text-faint no-underline"
-          >
-            <div className="flex h-11 w-11 items-center justify-center rounded-[13px] bg-surface-active text-accent">
-              <Plus size={22} />
-            </div>
-            <span className="font-mono text-xs">Nova música</span>
-          </Link>
+          {!songsQuery.isLoading && (
+            <Link
+              to="/songs/new"
+              className="flex min-h-[218px] flex-col items-center justify-center gap-[10px] rounded-card border border-dashed border-border-dashed text-faint no-underline"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-[13px] bg-surface-active text-accent">
+                <Plus size={22} />
+              </div>
+              <span className="font-mono text-xs">Nova música</span>
+            </Link>
+          )}
         </div>
       </div>
     </>

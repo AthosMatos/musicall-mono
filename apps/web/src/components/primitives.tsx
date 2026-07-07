@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { SongStatus } from "@monorepo/core";
-import type { CoverVariant } from "../data/songbook";
+import type { CoverVariant } from "../lib/model";
 
 const coverGradients: Record<Exclude<CoverVariant, "none">, string> = {
   warm: "linear-gradient(135deg,#2c2419,#3a2f20)",
