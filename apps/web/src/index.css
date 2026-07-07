@@ -1,75 +1,70 @@
 @import 'tailwindcss';
 
+/* Songbook design tokens — dark-only, tuned for stage/low-light use.
+   Source: design handoff (Songbook.dc.html). */
+@theme {
+  --color-*: initial;
+
+  --color-bg: #17140f;
+  --color-bg-deep: #15120d;
+  --color-surface: #1c1810;
+  --color-surface-alt: #1f1a13;
+  --color-surface-active: #241d15;
+  --color-surface-drag: #211a12;
+
+  --color-border: #221d16;
+  --color-border-alt: #261f17;
+  --color-border-strong: #2c261d;
+  --color-border-chip: #322c22;
+  --color-border-active: #33291d;
+  --color-border-drag: #38301f;
+  --color-border-dashed: #34302a;
+
+  --color-ink: #f0ebe1;
+  --color-ink-2: #cfc7ba;
+  --color-ink-3: #b7b0a5;
+  --color-lyric: #ddd5c8;
+  --color-meta: #9b948a;
+  --color-meta-2: #8a8276;
+  --color-faint: #6b655c;
+  --color-faint-2: #5b554d;
+
+  --color-accent: #c25e44;
+  --color-accent-soft: #e08a72;
+  --color-on-accent: #1a120e;
+  --color-amber: #cf9b3f;
+  --color-success: #83b58f;
+  --color-draft: #837a6e;
+
+  --color-wave-played: #c25e44;
+  --color-wave-warm: #5a4a3a;
+  --color-wave-muted: #3a2f24;
+
+  --font-ui: 'Bricolage Grotesque', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-card: 14px;
+  --radius-thumb: 10px;
+
+  --shadow-panel: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --shadow-fab: 0 8px 24px rgba(194, 94, 68, 0.4);
+  --shadow-drag: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-  }
-}
-
-#root {
-  @apply mx-auto flex min-h-svh max-w-[1126px] flex-col border-x border-[var(--border)] text-center;
+  color-scheme: dark;
 }
 
 body {
-  @apply m-0;
+  @apply m-0 bg-bg font-ui text-ink-2 antialiased;
+  font-size: 15px;
 }
 
-h1,
-h2 {
-  @apply font-medium text-[var(--text-h)];
-  font-family: var(--heading);
+#root {
+  min-height: 100svh;
 }
 
-h1 {
-  @apply my-8 text-[56px] tracking-[-1.68px];
-  @media (max-width: 1024px) {
-    @apply my-5 text-4xl;
-  }
-}
-
-h2 {
-  @apply mb-2 text-2xl leading-[118%] tracking-[-0.24px];
-  @media (max-width: 1024px) {
-    @apply text-xl;
-  }
-}
-
-p {
-  @apply m-0;
+/* mono uppercase section labels ([verso], sidebar headers, …) */
+.mono-label {
+  @apply font-mono text-[11px] tracking-[0.1em] uppercase;
 }

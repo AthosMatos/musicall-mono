@@ -1,16 +1,27 @@
-import { CounterButton } from "@monorepo/ui/counter-button";
-import { Link } from "@monorepo/ui/link";
+import { Route, Routes } from "react-router-dom";
+import Shell from "./components/Shell";
+import AlbumDetailPage from "./screens/AlbumDetailPage";
+import AlbumsPage from "./screens/AlbumsPage";
+import CreateSongPage from "./screens/CreateSongPage";
+import EditLyricsPage from "./screens/EditLyricsPage";
+import HomePage from "./screens/HomePage";
+import SongDetailPage from "./screens/SongDetailPage";
+import SongsPage from "./screens/SongsPage";
 
-export default function Index() {
+export default function App() {
   return (
-    <div className="container">
-      <h1 className="title">
-        <span>Athos Monorepo (Vite + NestJS) template</span>
-      </h1>
-      <CounterButton />
-      <p className="description">
-        Built With <Link href="https://turborepo.dev">Turborepo</Link>
-      </p>
-    </div>
+    <Routes>
+      <Route element={<Shell />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/songs" element={<SongsPage />} />
+        <Route path="/favorites" element={<SongsPage favoritesOnly />} />
+        <Route path="/albums" element={<AlbumsPage />} />
+        <Route path="/albums/:id" element={<AlbumDetailPage />} />
+      </Route>
+      {/* chrome-less flows (own top bars) */}
+      <Route path="/songs/new" element={<CreateSongPage />} />
+      <Route path="/songs/:id" element={<SongDetailPage />} />
+      <Route path="/songs/:id/edit" element={<EditLyricsPage />} />
+    </Routes>
   );
 }
