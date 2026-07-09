@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, Plus } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import {
+  collectionsAddSongOptions,
   collectionsGetOptions,
   collectionsListSongsKey,
   collectionsListSongsOptions,
@@ -10,16 +12,26 @@ import {
 import { CoverArt, MonoLabel } from "../components/primitives";
 import { ReorderableTrackList } from "../components/TrackList";
 import { collectionCover, collectionStatusLabel, collectionTypeLabel } from "../lib/model";
+import { AddTrackDialog } from "../components/AddTrackDialog";
 
 export default function AlbumDetailPage() {
   const { id = "" } = useParams();
   const queryClient = useQueryClient();
+  const [addOpen, setAddOpen] = useState(false);
   const albumQuery = useQuery({ ...collectionsGetOptions(id), enabled: !!id });
   const tracksQuery = useQuery({ ...collectionsListSongsOptions(id), enabled: !!id });
 
+  const invalidateTracks = () =>
+    queryClient.invalidateQueries({ queryKey: collectionsListSongsKey(id) });
+
   const reorder = useMutation({
     ...collectionsReorderOptions(),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: collectionsListSongsKey(id) }),
+    onSettled: invalidateTracks,
+  });
+
+  const addSong = useMutation({
+    ...collectionsAddSongOptions(),
+    onSuccess: invalidateTracks,
   });
 
   const album = albumQuery.data;
@@ -55,6 +67,7 @@ export default function AlbumDetailPage() {
         )}
         <button
           type="button"
+          onClick={() => setAddOpen(true)}
           className="mt-auto flex h-[46px] cursor-pointer items-center justify-center gap-[9px] rounded-xl border-none bg-accent pt-px text-sm font-semibold text-on-accent"
         >
           <Plus size={16} strokeWidth={2.5} /> Adicionar faixa
@@ -78,6 +91,20 @@ export default function AlbumDetailPage() {
           />
         )}
       </div>
+
+      {addOpen && (
+        <AddTrackDialog
+          existingIds={tracks.map((t) => t.id)}
+          isAdding={addSong.isPending}
+          onClose={() => setAddOpen(false)}
+          onAdd={(songId) =>
+            addSong.mutate(
+              { id, body: { songId } },
+              { onSuccess: () => setAddOpen(false) },
+            )
+          }
+        />
+      )}
     </div>
   );
 }

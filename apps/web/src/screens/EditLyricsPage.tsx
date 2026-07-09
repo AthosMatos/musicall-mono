@@ -1,21 +1,24 @@
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   lyricsCreateOptions,
   lyricsListKey,
   lyricsListOptions,
+  lyricsUpdateOptions,
   songsGetOptions,
   type LyricVersionListDto,
+  type LyricVersionResponseDto,
   type SongResponseDto,
 } from "@monorepo/core/api";
-import { MetaChip, MonoLabel } from "../components/primitives";
+import { MonoLabel } from "../components/primitives";
 import { shortDate } from "../lib/model";
 
 const insertableSections = ["verso", "refrão", "ponte", "pré"];
 
 export default function EditLyricsPage() {
   const { id = "" } = useParams();
+  const [searchParams] = useSearchParams();
   const songQuery = useQuery({ ...songsGetOptions(id), enabled: !!id });
   const lyricsQuery = useQuery({ ...lyricsListOptions(id), enabled: !!id });
 
@@ -25,25 +28,48 @@ export default function EditLyricsPage() {
   if (!songQuery.data) {
     return <div className="min-h-svh bg-bg p-10 font-mono text-sm text-meta">música não encontrada</div>;
   }
-  return <Editor song={songQuery.data} versions={lyricsQuery.data ?? []} />;
+
+  const versions = lyricsQuery.data ?? [];
+  const wantNew = searchParams.get("new") === "1";
+  const versionParam = searchParams.get("version");
+  // Which version we're editing. `undefined` → create-a-new-version mode. This
+  // happens when ?new=1 is passed, or when the song has no versions yet.
+  const editing = wantNew
+    ? undefined
+    : versions.find((v) => v.id === versionParam) ??
+      versions.find((v) => v.isPrimary) ??
+      versions[0];
+
+  return <Editor song={songQuery.data} versions={versions} editing={editing} />;
 }
 
-function Editor({ song, versions }: { song: SongResponseDto; versions: LyricVersionListDto }) {
+function Editor({
+  song,
+  versions,
+  editing,
+}: {
+  song: SongResponseDto;
+  versions: LyricVersionListDto;
+  editing: LyricVersionResponseDto | undefined;
+}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const base = versions.find((v) => v.isPrimary) ?? versions[0];
-  const [text, setText] = useState(base?.content ?? "");
+  const isNew = !editing;
+  const [text, setText] = useState(editing?.content ?? "");
   const editorRef = useRef<HTMLTextAreaElement>(null);
 
   const nextVersionNumber = versions.length + 1;
+  const [label, setLabel] = useState(editing?.label ?? `v${nextVersionNumber}`);
+  const trimmedLabel = label.trim();
 
-  const saveVersion = useMutation({
-    ...lyricsCreateOptions(),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: lyricsListKey(song.id) });
-      navigate(`/songs/${song.id}`);
-    },
-  });
+  const onSaved = async () => {
+    await queryClient.invalidateQueries({ queryKey: lyricsListKey(song.id) });
+    navigate(`/songs/${song.id}`);
+  };
+  const createVersion = useMutation({ ...lyricsCreateOptions(), onSuccess: onSaved });
+  const updateVersion = useMutation({ ...lyricsUpdateOptions(), onSuccess: onSaved });
+  const saving = createVersion.isPending || updateVersion.isPending;
+  const saveError = createVersion.isError || updateVersion.isError;
 
   function insertSection(name: string) {
     const editor = editorRef.current;
@@ -61,10 +87,19 @@ function Editor({ song, versions }: { song: SongResponseDto; versions: LyricVers
   }
 
   function save() {
-    saveVersion.mutate({
-      songId: song.id,
-      body: { label: `v${nextVersionNumber}`, content: text, isPrimary: true },
-    });
+    const finalLabel = trimmedLabel || `v${nextVersionNumber}`;
+    if (editing) {
+      updateVersion.mutate({
+        songId: song.id,
+        id: editing.id,
+        body: { label: finalLabel, content: text },
+      });
+    } else {
+      createVersion.mutate({
+        songId: song.id,
+        body: { label: finalLabel, content: text, isPrimary: true },
+      });
+    }
   }
 
   return (
@@ -75,18 +110,28 @@ function Editor({ song, versions }: { song: SongResponseDto; versions: LyricVers
         </Link>
         <div className="flex-1 text-center">
           <span className="text-lg font-semibold text-ink">{song.title}</span>
-          <span className="ml-3 font-mono text-xs text-amber">editando</span>
+          <span className="ml-3 font-mono text-xs text-amber">
+            {isNew ? "nova versão" : "editando"}
+          </span>
         </div>
-        <MetaChip className="text-meta">
-          v{nextVersionNumber} · nova ▾
-        </MetaChip>
+        <label className="flex items-center gap-2 rounded-lg border border-border-strong bg-surface-alt px-[11px] py-[5px] font-mono text-xs focus-within:border-border-active">
+          <input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder={`v${nextVersionNumber}`}
+            aria-label="Título da versão"
+            maxLength={100}
+            className="w-[90px] border-none bg-transparent text-ink outline-none placeholder:text-faint"
+          />
+          <span className="text-faint">{isNew ? "· nova" : "· atual"}</span>
+        </label>
         <button
           type="button"
           onClick={save}
-          disabled={saveVersion.isPending || !text.trim()}
+          disabled={saving || !text.trim()}
           className="flex h-10 cursor-pointer items-center rounded-[11px] border-none bg-accent px-5 text-sm font-semibold text-on-accent disabled:opacity-60"
         >
-          {saveVersion.isPending ? "salvando…" : "Salvar versão"}
+          {saving ? "salvando…" : isNew ? "Salvar versão" : "Salvar"}
         </button>
       </header>
 
@@ -124,30 +169,44 @@ function Editor({ song, versions }: { song: SongResponseDto; versions: LyricVers
           <section>
             <MonoLabel className="mb-3">Versões</MonoLabel>
             <div className="flex flex-col gap-2">
-              <div className="flex items-center rounded-[11px] border border-border-active bg-surface-active px-[13px] py-[11px]">
-                <span className="font-mono text-[13px] text-ink">v{nextVersionNumber} · editando</span>
-              </div>
-              {versions.map((version) => (
-                <div
-                  key={version.id}
-                  className="flex items-center rounded-[11px] border border-border-alt bg-surface px-[13px] py-[11px]"
-                >
-                  <span className="font-mono text-[13px] text-ink-3">{version.label}</span>
-                  {version.isPrimary ? (
-                    <span className="ml-auto font-mono text-[10px] text-accent-soft">principal</span>
-                  ) : (
-                    <span className="ml-auto font-mono text-[11px] text-faint">
-                      {shortDate(version.createdAt)}
-                    </span>
-                  )}
+              {isNew && (
+                <div className="flex items-center rounded-[11px] border border-border-active bg-surface-active px-[13px] py-[11px]">
+                  <span className="font-mono text-[13px] text-ink">
+                    {trimmedLabel || `v${nextVersionNumber}`} · editando
+                  </span>
                 </div>
-              ))}
+              )}
+              {versions.map((version) => {
+                const active = editing?.id === version.id;
+                return (
+                  <div
+                    key={version.id}
+                    className={`flex items-center rounded-[11px] border px-[13px] py-[11px] ${
+                      active ? "border-border-active bg-surface-active" : "border-border-alt bg-surface"
+                    }`}
+                  >
+                    <span className={`font-mono text-[13px] ${active ? "text-ink" : "text-ink-3"}`}>
+                      {active ? trimmedLabel || version.label : version.label}
+                      {active ? " · editando" : ""}
+                    </span>
+                    {active ? (
+                      <span className="ml-auto font-mono text-[10px] text-amber">editando</span>
+                    ) : version.isPrimary ? (
+                      <span className="ml-auto font-mono text-[10px] text-accent-soft">principal</span>
+                    ) : (
+                      <span className="ml-auto font-mono text-[11px] text-faint">
+                        {shortDate(version.createdAt)}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
 
           <div className="mt-auto flex items-center gap-[7px] font-mono text-xs text-success">
             <span className="h-[6px] w-[6px] rounded-full bg-success" />
-            {saveVersion.isError ? (
+            {saveError ? (
               <span className="text-accent-soft">erro ao salvar — tente de novo</span>
             ) : (
               "salva ao confirmar a versão"

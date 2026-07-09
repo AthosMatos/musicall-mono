@@ -1,13 +1,12 @@
 import type { AuthTokens } from "@monorepo/core";
-import { authLogin, authLogout, authRegister, usersGetMe, type UserResponseDto } from "@monorepo/core/api";
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+  authLogin,
+  authLogout,
+  authRegister,
+  type UserResponseDto,
+  usersGetMe,
+} from "@monorepo/core/api";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { clearTokens, getStoredRefreshToken, loadStoredAccessToken, setTokens } from "./api";
 import { queryClient } from "./query";
 
@@ -57,25 +56,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      try {
-        console.log("login called with", email, password);
-        const authlogin = await authLogin({ email, password })
-        console.log("authLogin returned", authlogin);
-        await finishSignIn(authlogin);
-      }
-      catch (error) {
-        console.error("Login failed:", error);
-        throw error; // rethrow the error after logging it
-      }
+      await finishSignIn(await authLogin({ email, password }));
     },
-    [finishSignIn],
+    [finishSignIn]
   );
 
   const register = useCallback(
     async (name: string, email: string, password: string) => {
       await finishSignIn(await authRegister({ name, email, password }));
     },
-    [finishSignIn],
+    [finishSignIn]
   );
 
   const logout = useCallback(async () => {

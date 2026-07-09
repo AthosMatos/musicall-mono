@@ -1,16 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import { PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import {
+  collectionsAddSongOptions,
   collectionsGetOptions,
   collectionsListSongsKey,
   collectionsListSongsOptions,
   collectionsReorderOptions,
   type SongResponseDto,
+  songsSearchOptions,
 } from "@monorepo/core/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import {
+  Modal,
+  PanResponder,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { CoverArt, MonoLabel, StatusDot } from "@/components/ui";
 import {
   collectionCover,
@@ -50,7 +61,7 @@ function TrackRow({
       onPanResponderMove: (_evt, gesture) => startDragRef.current(indexRef.current, gesture.dy),
       onPanResponderRelease: () => startDragRef.current(-1, 0),
       onPanResponderTerminate: () => startDragRef.current(-1, 0),
-    }),
+    })
   );
 
   const untitled = song.status === "draft" && !song.key;
@@ -99,6 +110,7 @@ export default function AlbumDetailScreen() {
   const [tracks, setTracks] = useState<SongResponseDto[]>([]);
   const [dragIndex, setDragIndex] = useState(-1);
   const [dragOffset, setDragOffset] = useState(0);
+  const [addOpen, setAddOpen] = useState(false);
   const drag = useRef({ start: -1, current: -1, rowHeight: 64 + ROW_GAP });
 
   const serverTracks = tracksQuery.data;
@@ -106,9 +118,17 @@ export default function AlbumDetailScreen() {
     if (serverTracks) setTracks(serverTracks);
   }, [serverTracks]);
 
+  const invalidateTracks = () =>
+    queryClient.invalidateQueries({ queryKey: collectionsListSongsKey(id) });
+
   const reorder = useMutation({
     ...collectionsReorderOptions(),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: collectionsListSongsKey(id) }),
+    onSettled: invalidateTracks,
+  });
+
+  const addSong = useMutation({
+    ...collectionsAddSongOptions(),
+    onSuccess: invalidateTracks,
   });
 
   const album = albumQuery.data;
@@ -216,14 +236,108 @@ export default function AlbumDetailScreen() {
       </ScrollView>
 
       <View style={{ paddingHorizontal: 24, paddingVertical: 14 }}>
-        <Pressable style={styles.addTrack} onPress={() => router.push("/capture")}>
+        <Pressable style={styles.addTrack} onPress={() => setAddOpen(true)}>
           <Ionicons name="add" size={18} color={colors.onAccent} />
           <Text style={{ fontFamily: fonts.uiSemiBold, fontSize: 15, color: colors.onAccent }}>
             Adicionar faixa
           </Text>
         </Pressable>
       </View>
+
+      <AddTrackModal
+        visible={addOpen}
+        existingIds={tracks.map((t) => t.id)}
+        isAdding={addSong.isPending}
+        onClose={() => setAddOpen(false)}
+        onAdd={(songId) =>
+          addSong.mutate({ id, body: { songId } }, { onSuccess: () => setAddOpen(false) })
+        }
+      />
     </SafeAreaView>
+  );
+}
+
+/** Modal to add an existing song (not already in the collection) as a track. */
+function AddTrackModal({
+  visible,
+  existingIds,
+  isAdding,
+  onAdd,
+  onClose,
+}: {
+  visible: boolean;
+  existingIds: string[];
+  isAdding: boolean;
+  onAdd: (songId: string) => void;
+  onClose: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const q = query.trim();
+  const songsQuery = useQuery({
+    ...songsSearchOptions({ q: q || undefined, pageSize: 60 }),
+    enabled: visible,
+  });
+  const existing = new Set(existingIds);
+  const candidates = (songsQuery.data?.items ?? []).filter((s) => !existing.has(s.id));
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.sheetOverlay}>
+        <View style={styles.sheet}>
+          <View style={styles.sheetHeader}>
+            <Text style={styles.sheetTitle}>Adicionar faixa</Text>
+            <Pressable onPress={onClose} hitSlop={10}>
+              <Ionicons name="close" size={22} color={colors.ink2} />
+            </Pressable>
+          </View>
+
+          <View style={styles.sheetSearch}>
+            <Ionicons name="search" size={15} color={colors.faint} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Buscar músicas…"
+              placeholderTextColor={colors.faint}
+              selectionColor={colors.accent}
+              style={styles.sheetSearchInput}
+            />
+          </View>
+
+          <ScrollView contentContainerStyle={{ paddingBottom: 24, gap: 8 }}>
+            {songsQuery.isLoading && <Text style={styles.sheetEmpty}>carregando…</Text>}
+            {!songsQuery.isLoading && candidates.length === 0 && (
+              <Text style={styles.sheetEmpty}>
+                {q ? "nenhuma música encontrada" : "todas as músicas já estão nesta coleção"}
+              </Text>
+            )}
+            {candidates.map((song) => {
+              const untitled = song.status === "draft" && !song.key;
+              return (
+                <Pressable
+                  key={song.id}
+                  disabled={isAdding}
+                  onPress={() => onAdd(song.id)}
+                  style={[styles.candidateRow, isAdding && { opacity: 0.5 }]}
+                >
+                  <StatusDot status={song.status} />
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text
+                      style={[styles.trackTitle, untitled && { color: colors.ink2 }]}
+                      numberOfLines={1}
+                    >
+                      {song.title}
+                    </Text>
+                  </View>
+                  <Text style={styles.trackMeta}>
+                    {song.key ? songMeta(song) : statusLabel[song.status]}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -300,5 +414,64 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
+  },
+  sheetOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    maxHeight: "80%",
+    backgroundColor: colors.bg,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.borderAlt,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
+  },
+  sheetTitle: { fontFamily: fonts.uiSemiBold, fontSize: 18, color: colors.ink },
+  sheetSearch: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    height: 44,
+    paddingHorizontal: 14,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  sheetSearchInput: {
+    flex: 1,
+    fontFamily: fonts.ui,
+    fontSize: 15,
+    color: colors.ink,
+    paddingVertical: 0,
+  },
+  sheetEmpty: {
+    fontFamily: fonts.mono,
+    fontSize: 12,
+    color: colors.faint,
+    textAlign: "center",
+    paddingVertical: 28,
+  },
+  candidateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 11,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.borderAlt,
   },
 });

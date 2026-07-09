@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, MoreVertical } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronLeft, MoreVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   chordsListOptions,
+  lyricsListKey,
   lyricsListOptions,
+  lyricsRemoveOptions,
   mediaListForSongOptions,
   songsGetOptions,
   tabsListOptions,
@@ -19,14 +21,35 @@ type Tab = (typeof tabs)[number];
 
 export default function SongDetailPage() {
   const { id = "" } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("Letra");
   const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    window.addEventListener("mousedown", onDown);
+    return () => window.removeEventListener("mousedown", onDown);
+  }, [menuOpen]);
 
   const songQuery = useQuery({ ...songsGetOptions(id), enabled: !!id });
   const lyricsQuery = useQuery({ ...lyricsListOptions(id), enabled: !!id });
   const chordsQuery = useQuery({ ...chordsListOptions(id), enabled: !!id && activeTab === "Cifra" });
   const tabsQuery = useQuery({ ...tabsListOptions(id), enabled: !!id && activeTab === "Tab" });
   const mediaQuery = useQuery({ ...mediaListForSongOptions(id), enabled: !!id });
+
+  const removeLyric = useMutation({
+    ...lyricsRemoveOptions(),
+    onSuccess: () => {
+      setActiveVersionId(null);
+      return queryClient.invalidateQueries({ queryKey: lyricsListKey(id) });
+    },
+  });
 
   const song = songQuery.data;
   const versions = lyricsQuery.data ?? [];
@@ -64,9 +87,49 @@ export default function SongDetailPage() {
           </div>
         </div>
         <SavedIndicator label="salvo automaticamente" />
-        <button type="button" className="cursor-pointer border-none bg-transparent p-0 text-[#7a7268]">
-          <MoreVertical size={20} />
-        </button>
+        <div ref={menuRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="Mais opções"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className="flex cursor-pointer border-none bg-transparent p-0 text-[#7a7268] hover:text-ink-2"
+          >
+            <MoreVertical size={20} />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-[calc(100%+8px)] z-20 w-[180px] overflow-hidden rounded-xl border border-border-alt bg-bg py-1 shadow-drag">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate(
+                    activeVersion
+                      ? `/songs/${song.id}/edit?version=${activeVersion.id}`
+                      : `/songs/${song.id}/edit?new=1`,
+                  );
+                }}
+                className="flex w-full cursor-pointer items-center gap-[10px] border-none bg-transparent px-4 py-[10px] text-left text-sm text-ink-3 hover:bg-surface-active hover:text-ink"
+              >
+                <Pencil size={15} /> Editar letra
+              </button>
+              <button
+                type="button"
+                disabled={!activeVersion || removeLyric.isPending}
+                onClick={() => {
+                  if (!activeVersion) return;
+                  if (!window.confirm(`Excluir a versão "${activeVersion.label}" da letra?`)) return;
+                  setMenuOpen(false);
+                  removeLyric.mutate({ songId: song.id, id: activeVersion.id });
+                }}
+                className="flex w-full cursor-pointer items-center gap-[10px] border-none bg-transparent px-4 py-[10px] text-left text-sm text-accent-soft hover:bg-surface-active disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Trash2 size={15} /> Excluir letra
+              </button>
+            </div>
+          )}
+        </div>
       </header>
 
       <div className="flex min-h-0 flex-1">
@@ -89,7 +152,7 @@ export default function SongDetailPage() {
             ))}
             <div className="flex-1" />
             {activeVersion && (
-              <Link to={`/songs/${song.id}/edit`} className="mb-2 no-underline">
+              <Link to={`/songs/${song.id}/edit?version=${activeVersion.id}`} className="mb-2 no-underline">
                 <MetaChip className="cursor-pointer text-meta">
                   {activeVersion.label} · {activeVersion.isPrimary ? "atual" : shortDate(activeVersion.createdAt)} ▾
                 </MetaChip>
@@ -139,7 +202,17 @@ export default function SongDetailPage() {
           </section>
 
           <section>
-            <MonoLabel className="mb-[11px]">Versões da letra</MonoLabel>
+            <div className="mb-[11px] flex items-center justify-between">
+              <MonoLabel>Versões da letra</MonoLabel>
+              <Link
+                to={`/songs/${song.id}/edit?new=1`}
+                aria-label="Nova versão"
+                title="Nova versão"
+                className="flex h-6 w-6 items-center justify-center rounded-md border border-border-alt bg-surface text-faint no-underline hover:border-border-active hover:text-ink"
+              >
+                <Plus size={14} />
+              </Link>
+            </div>
             <div className="flex flex-col gap-2">
               {versions.length === 0 && (
                 <div className="rounded-[11px] border border-dashed border-border-dashed p-[11px] text-center font-mono text-xs text-faint">

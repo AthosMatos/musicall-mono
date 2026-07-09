@@ -1,20 +1,22 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
-import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { parseLyricSections } from "@monorepo/core";
 import {
   chordsListOptions,
+  lyricsListKey,
   lyricsListOptions,
+  lyricsRemoveOptions,
   mediaListForSongOptions,
   songsGetOptions,
   tabsListOptions,
 } from "@monorepo/core/api";
-import { CoverArt, MetaChip, PlayButton, StatusPill, Waveform, formatTime } from "@/components/ui";
-import { useAudioPlayback } from "@/lib/playback";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { CoverArt, formatTime, MetaChip, PlayButton, StatusPill, Waveform } from "@/components/ui";
 import { formatDuration, statusLabel, waveformSamples } from "@/lib/model";
+import { useAudioPlayback } from "@/lib/playback";
 import { colors, fonts } from "@/theme";
 
 const tabs = ["Letra", "Cifra", "Tab", "Áudios", "Imagens"] as const;
@@ -46,7 +48,15 @@ function LyricContent({ content }: { content: string }) {
   );
 }
 
-function EmptyState({ label, action, onPress }: { label: string; action: string; onPress?: () => void }) {
+function EmptyState({
+  label,
+  action,
+  onPress,
+}: {
+  label: string;
+  action: string;
+  onPress?: () => void;
+}) {
   return (
     <View style={{ gap: 12, alignItems: "flex-start" }}>
       <Text style={{ fontFamily: fonts.mono, fontSize: 13, color: colors.faint }}>{label}</Text>
@@ -78,13 +88,20 @@ function BottomPlayer({ assetId, durationSec }: { assetId: string; durationSec: 
 
 export default function SongDetailScreen() {
   const { id = "" } = useLocalSearchParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("Letra");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const songQuery = useQuery({ ...songsGetOptions(id), enabled: !!id });
   const lyricsQuery = useQuery({ ...lyricsListOptions(id), enabled: !!id });
   const chordsQuery = useQuery({ ...chordsListOptions(id), enabled: !!id });
   const tabsQuery = useQuery({ ...tabsListOptions(id), enabled: !!id });
   const mediaQuery = useQuery({ ...mediaListForSongOptions(id), enabled: !!id });
+
+  const removeLyric = useMutation({
+    ...lyricsRemoveOptions(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: lyricsListKey(id) }),
+  });
 
   const song = songQuery.data;
   const versions = lyricsQuery.data ?? [];
@@ -120,10 +137,66 @@ export default function SongDetailScreen() {
           <View style={styles.savedDot} />
           <Text style={styles.savedText}>salvo</Text>
         </View>
-        <Pressable hitSlop={10}>
+        <Pressable hitSlop={10} onPress={() => setMenuOpen(true)}>
           <Ionicons name="ellipsis-vertical" size={19} color={colors.ink2} />
         </Pressable>
       </View>
+
+      {/* more menu */}
+      <Modal
+        visible={menuOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuOpen(false)}
+      >
+        <Pressable style={styles.menuOverlay} onPress={() => setMenuOpen(false)}>
+          <View style={styles.menu}>
+            <Pressable
+              style={styles.menuItem}
+              onPress={() => {
+                setMenuOpen(false);
+                router.push(
+                  primary
+                    ? `/song/${song.id}/edit?version=${primary.id}`
+                    : `/song/${song.id}/edit?new=1`
+                );
+              }}
+            >
+              <Ionicons name="pencil" size={17} color={colors.ink3} />
+              <Text style={styles.menuText}>Editar letra</Text>
+            </Pressable>
+            <Pressable
+              style={styles.menuItem}
+              onPress={() => {
+                setMenuOpen(false);
+                router.push(`/song/${song.id}/edit?new=1`);
+              }}
+            >
+              <Ionicons name="add" size={17} color={colors.ink3} />
+              <Text style={styles.menuText}>Nova versão</Text>
+            </Pressable>
+            <Pressable
+              disabled={!primary}
+              style={[styles.menuItem, !primary && { opacity: 0.4 }]}
+              onPress={() => {
+                if (!primary) return;
+                setMenuOpen(false);
+                Alert.alert("Excluir letra", `Excluir a versão "${primary.label}" da letra?`, [
+                  { text: "Cancelar", style: "cancel" },
+                  {
+                    text: "Excluir",
+                    style: "destructive",
+                    onPress: () => removeLyric.mutate({ songId: song.id, id: primary.id }),
+                  },
+                ]);
+              }}
+            >
+              <Ionicons name="trash-outline" size={17} color={colors.accentSoft} />
+              <Text style={[styles.menuText, { color: colors.accentSoft }]}>Excluir letra</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
 
       {/* title block */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
@@ -135,10 +208,8 @@ export default function SongDetailScreen() {
           {song.key && <MetaChip>Tom · {song.key}</MetaChip>}
           {song.bpm && <MetaChip>{song.bpm} BPM</MetaChip>}
           {primary && (
-            <Pressable onPress={() => router.push(`/song/${song.id}/edit`)}>
-              <MetaChip>
-                {primary.label} · atual ▾
-              </MetaChip>
+            <Pressable onPress={() => router.push(`/song/${song.id}/edit?version=${primary.id}`)}>
+              <MetaChip>{primary.label} · atual ▾</MetaChip>
             </Pressable>
           )}
         </View>
@@ -149,7 +220,11 @@ export default function SongDetailScreen() {
         {tabs.map((tab) => {
           const active = tab === activeTab;
           return (
-            <Pressable key={tab} onPress={() => setActiveTab(tab)} style={[styles.tab, active && styles.tabActive]}>
+            <Pressable
+              key={tab}
+              onPress={() => setActiveTab(tab)}
+              style={[styles.tab, active && styles.tabActive]}
+            >
               <Text
                 style={{
                   fontSize: 15,
@@ -173,7 +248,7 @@ export default function SongDetailScreen() {
             <EmptyState
               label="sem letra ainda"
               action="escrever letra"
-              onPress={() => router.push(`/song/${song.id}/edit`)}
+              onPress={() => router.push(`/song/${song.id}/edit?new=1`)}
             />
           ))}
         {activeTab === "Cifra" &&
@@ -200,7 +275,14 @@ export default function SongDetailScreen() {
                     <Text style={{ fontFamily: fonts.mono, fontSize: 13, color: colors.ink2 }}>
                       {asset.label}
                     </Text>
-                    <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.meta2, marginTop: 2 }}>
+                    <Text
+                      style={{
+                        fontFamily: fonts.mono,
+                        fontSize: 11,
+                        color: colors.meta2,
+                        marginTop: 2,
+                      }}
+                    >
                       {formatDuration(asset.durationSec) ?? "—"}
                     </Text>
                   </View>
@@ -208,9 +290,15 @@ export default function SongDetailScreen() {
               ))}
             </View>
           ) : (
-            <EmptyState label="sem áudios ainda" action="gravar ideia" onPress={() => router.push("/capture")} />
+            <EmptyState
+              label="sem áudios ainda"
+              action="gravar ideia"
+              onPress={() => router.push("/capture")}
+            />
           ))}
-        {activeTab === "Imagens" && <EmptyState label="sem imagens ainda" action="adicionar imagem" />}
+        {activeTab === "Imagens" && (
+          <EmptyState label="sem imagens ainda" action="adicionar imagem" />
+        )}
       </ScrollView>
 
       {/* player */}
@@ -232,6 +320,30 @@ const styles = StyleSheet.create({
   savedRow: { flexDirection: "row", alignItems: "center", gap: 7 },
   savedDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success },
   savedText: { fontFamily: fonts.mono, fontSize: 12, color: colors.success },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingTop: 54,
+    paddingRight: 18,
+    alignItems: "flex-end",
+  },
+  menu: {
+    minWidth: 200,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.borderAlt,
+    borderRadius: 14,
+    paddingVertical: 4,
+    overflow: "hidden",
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  menuText: { fontFamily: fonts.ui, fontSize: 15, color: colors.ink3 },
   title: { fontFamily: fonts.uiSemiBold, fontSize: 28, color: colors.ink, letterSpacing: -0.56 },
   tabRow: {
     flexDirection: "row",

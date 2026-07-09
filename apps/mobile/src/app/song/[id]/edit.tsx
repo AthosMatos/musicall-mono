@@ -1,3 +1,13 @@
+import {
+  type LyricVersionListDto,
+  type LyricVersionResponseDto,
+  lyricsCreateOptions,
+  lyricsListKey,
+  lyricsListOptions,
+  lyricsUpdateOptions,
+  type SongResponseDto,
+  songsGetOptions,
+} from "@monorepo/core/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
@@ -11,21 +21,20 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  lyricsCreateOptions,
-  lyricsListKey,
-  lyricsListOptions,
-  songsGetOptions,
-  type LyricVersionListDto,
-  type SongResponseDto,
-} from "@monorepo/core/api";
-import { MetaChip } from "@/components/ui";
 import { colors, fonts } from "@/theme";
 
 const insertableSections = ["verso", "refrão", "ponte"];
 
 export default function EditLyricsScreen() {
-  const { id = "" } = useLocalSearchParams<{ id: string }>();
+  const {
+    id = "",
+    version,
+    new: newParam,
+  } = useLocalSearchParams<{
+    id: string;
+    version?: string;
+    new?: string;
+  }>();
   const songQuery = useQuery({ ...songsGetOptions(id), enabled: !!id });
   const lyricsQuery = useQuery({ ...lyricsListOptions(id), enabled: !!id });
 
@@ -43,26 +52,45 @@ export default function EditLyricsScreen() {
       </SafeAreaView>
     );
   }
-  return <Editor song={songQuery.data} versions={lyricsQuery.data ?? []} />;
+
+  const versions = lyricsQuery.data ?? [];
+  // `undefined` → create-a-new-version mode (?new=1 or no versions yet).
+  const editing =
+    newParam === "1"
+      ? undefined
+      : (versions.find((v) => v.id === version) ??
+        versions.find((v) => v.isPrimary) ??
+        versions[0]);
+
+  return <Editor song={songQuery.data} versions={versions} editing={editing} />;
 }
 
-function Editor({ song, versions }: { song: SongResponseDto; versions: LyricVersionListDto }) {
+function Editor({
+  song,
+  versions,
+  editing,
+}: {
+  song: SongResponseDto;
+  versions: LyricVersionListDto;
+  editing: LyricVersionResponseDto | undefined;
+}) {
   const queryClient = useQueryClient();
-  const base = versions.find((v) => v.isPrimary) ?? versions[0];
-  const [text, setText] = useState(base?.content ?? "");
+  const [text, setText] = useState(editing?.content ?? "");
   const selection = useRef({ start: 0, end: 0 });
   const inputRef = useRef<TextInput>(null);
 
   const nextVersionNumber = versions.length + 1;
-  const baseLabel = base ? `a partir de ${base.label}` : "primeira versão";
+  const [label, setLabel] = useState(editing?.label ?? `v${nextVersionNumber}`);
+  const trimmedLabel = label.trim();
 
-  const saveVersion = useMutation({
-    ...lyricsCreateOptions(),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: lyricsListKey(song.id) });
-      router.back();
-    },
-  });
+  const onSaved = async () => {
+    await queryClient.invalidateQueries({ queryKey: lyricsListKey(song.id) });
+    router.back();
+  };
+  const createVersion = useMutation({ ...lyricsCreateOptions(), onSuccess: onSaved });
+  const updateVersion = useMutation({ ...lyricsUpdateOptions(), onSuccess: onSaved });
+  const saving = createVersion.isPending || updateVersion.isPending;
+  const saveError = createVersion.isError || updateVersion.isError;
 
   function insertSection(name: string) {
     const at = selection.current.end || text.length;
@@ -72,11 +100,20 @@ function Editor({ song, versions }: { song: SongResponseDto; versions: LyricVers
   }
 
   function save() {
-    if (!text.trim() || saveVersion.isPending) return;
-    saveVersion.mutate({
-      songId: song.id,
-      body: { label: `v${nextVersionNumber}`, content: text, isPrimary: true },
-    });
+    if (!text.trim() || saving) return;
+    const finalLabel = trimmedLabel || `v${nextVersionNumber}`;
+    if (editing) {
+      updateVersion.mutate({
+        songId: song.id,
+        id: editing.id,
+        body: { label: finalLabel, content: text },
+      });
+    } else {
+      createVersion.mutate({
+        songId: song.id,
+        body: { label: finalLabel, content: text, isPrimary: true },
+      });
+    }
   }
 
   return (
@@ -93,29 +130,41 @@ function Editor({ song, versions }: { song: SongResponseDto; versions: LyricVers
           <View style={styles.editingRow}>
             <View style={styles.editingDot} />
             <Text style={styles.editingText}>
-              {saveVersion.isError ? "erro ao salvar" : "editando"}
+              {saveError ? "erro ao salvar" : editing ? "editando" : "nova versão"}
             </Text>
           </View>
-          <Pressable onPress={save} hitSlop={10} disabled={saveVersion.isPending}>
+          <Pressable onPress={save} hitSlop={10} disabled={saving}>
             <Text
               style={{
                 fontFamily: fonts.uiSemiBold,
                 fontSize: 15,
                 color: colors.accent,
-                opacity: saveVersion.isPending ? 0.6 : 1,
+                opacity: saving ? 0.6 : 1,
               }}
             >
-              {saveVersion.isPending ? "…" : "Salvar"}
+              {saving ? "…" : "Salvar"}
             </Text>
           </Pressable>
         </View>
 
-        {/* title + version */}
+        {/* title + editable version label */}
         <View style={{ paddingHorizontal: 24, paddingBottom: 12 }}>
           <Text style={styles.title}>{song.title}</Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 10 }}>
-            <MetaChip active>v{nextVersionNumber} · nova ▾</MetaChip>
-            <Text style={{ fontFamily: fonts.mono, fontSize: 12, color: colors.meta2 }}>{baseLabel}</Text>
+            <View style={styles.labelChip}>
+              <TextInput
+                value={label}
+                onChangeText={setLabel}
+                placeholder={`v${nextVersionNumber}`}
+                placeholderTextColor={colors.faint}
+                selectionColor={colors.accent}
+                maxLength={100}
+                style={styles.labelInput}
+              />
+              <Text style={{ fontFamily: fonts.mono, fontSize: 12, color: colors.faint }}>
+                {editing ? "· atual" : "· nova"}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -140,7 +189,9 @@ function Editor({ song, versions }: { song: SongResponseDto; versions: LyricVers
         <View style={styles.toolbar}>
           {insertableSections.map((name) => (
             <Pressable key={name} onPress={() => insertSection(name)} style={styles.toolbarChip}>
-              <Text style={{ fontFamily: fonts.mono, fontSize: 12, color: colors.ink3 }}>+ {name}</Text>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 12, color: colors.ink3 }}>
+                + {name}
+              </Text>
             </Pressable>
           ))}
         </View>
@@ -163,6 +214,24 @@ const styles = StyleSheet.create({
   editingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.amber },
   editingText: { fontFamily: fonts.mono, fontSize: 12, color: colors.amber },
   title: { fontFamily: fonts.uiSemiBold, fontSize: 21, color: colors.ink },
+  labelChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: colors.surfaceActive,
+    borderWidth: 1,
+    borderColor: colors.borderActive,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  labelInput: {
+    fontFamily: fonts.mono,
+    fontSize: 12,
+    color: colors.ink,
+    padding: 0,
+    minWidth: 44,
+  },
   editor: {
     flex: 1,
     paddingHorizontal: 24,

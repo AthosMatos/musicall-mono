@@ -83,7 +83,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     await this.auth.logout(this.readRefreshToken(req, dto));
-    res.clearCookie(REFRESH_COOKIE, { path: '/' });
+    res.clearCookie(REFRESH_COOKIE, this.refreshCookieOptions());
   }
 
   @Public()
@@ -108,13 +108,32 @@ export class AuthController {
     return cookies?.[REFRESH_COOKIE] ?? dto.refreshToken;
   }
 
+  /**
+   * Cookie attributes shared by set + clear (browsers only clear a cookie when
+   * these match). In production the SPA and API are on different sites, so the
+   * refresh cookie must be `SameSite=None; Secure` — otherwise the browser
+   * won't send it on the cross-site `POST /auth/refresh` and the session can't
+   * be restored on reload. Locally we stay on `lax` (works same-site over http).
+   */
+  private refreshCookieOptions(): {
+    httpOnly: true;
+    secure: boolean;
+    sameSite: 'none' | 'lax';
+    path: string;
+  } {
+    const isProd = this.config.get('NODE_ENV') === 'production';
+    return {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      path: '/',
+    };
+  }
+
   private setRefreshCookie(res: Response, token: string | undefined): void {
     if (!token) return;
     res.cookie(REFRESH_COOKIE, token, {
-      httpOnly: true,
-      secure: this.config.get('NODE_ENV') === 'production',
-      sameSite: 'lax',
-      path: '/',
+      ...this.refreshCookieOptions(),
       maxAge: parseDurationMs(this.config.get('JWT_REFRESH_TTL')),
     });
   }

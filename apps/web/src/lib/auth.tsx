@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import type { AuthTokens } from "@monorepo/core";
 import { authLogin, authLogout, authRegister, usersGetMe, type UserResponseDto } from "@monorepo/core/api";
-import { api, setAccessToken } from "./api";
+import { refreshSession, setAccessToken } from "./api";
 import { AuthContext, useAuth, type AuthStatus } from "./auth-context";
 import { queryClient } from "./query";
 
@@ -10,16 +10,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [user, setUser] = useState<UserResponseDto | null>(null);
 
-  // Restore the session from the httpOnly refresh cookie on load.
+  // Restore the session from the httpOnly refresh cookie on load. `refreshSession`
+  // dedupes concurrent calls, so StrictMode's double-mounted effect only rotates
+  // the single-use refresh token once.
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      const token = await refreshSession();
+      if (cancelled) return;
+      if (!token) {
+        setStatus("signedOut");
+        return;
+      }
       try {
-        const tokens = await api.request<AuthTokens>("/api/auth/refresh", {
-          method: "POST",
-          anonymous: true,
-        });
-        setAccessToken(tokens.accessToken);
         const me = await usersGetMe();
         if (cancelled) return;
         setUser(me);
