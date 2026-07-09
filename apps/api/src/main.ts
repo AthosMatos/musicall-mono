@@ -35,7 +35,13 @@ async function bootstrap(): Promise<void> {
   app.setGlobalPrefix('api');
   app.use(cookieParser());
   app.enableCors({ origin: config.get('WEB_ORIGIN'), credentials: true });
-
+  app.enableCors({
+    origin: [
+      config.get('WEB_ORIGIN'),
+      "https://musicall-mono.pages.dev"
+    ],
+    credentials: true,
+  });
   const swaggerConfig = new DocumentBuilder()
     .setTitle('musicall API')
     .setDescription(
