@@ -21,4 +21,4 @@ jobs:
 
       - run: pnpm install
 
-      - run: pnpm filter --filter=mobile eas-build-preview-android
+      - run: pnpm --filter=mobile eas-build-preview-android
