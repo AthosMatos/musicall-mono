@@ -1,5 +1,5 @@
-// Songbook design tokens — dark-only, tuned for stage/low-light use.
-// Source: design handoff (Songbook.dc.html). Mirrors apps/web/src/index.css.
+// musicall design tokens — dark-only, tuned for stage/low-light use.
+// Source: design handoff (musicall.dc.html). Mirrors apps/web/src/index.css.
 
 export const colors = {
   bg: "#17140f",

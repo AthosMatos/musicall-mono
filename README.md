@@ -1,6 +1,6 @@
-# Songbook
+# musicall
 
-A full-stack monorepo for **Songbook**, a musician's "second brain" for storing, developing, and organizing songs (lyrics, chords, tabs, audio, images) across web and mobile. Built with NestJS (API), Vite + React (web), and Expo (mobile), with shared packages and centralized tooling. See [CONTEXT.md](CONTEXT.md) for the domain glossary and [docs/adr/](docs/adr/) for architecture decisions.
+A full-stack monorepo for **musicall**, a musician's "second brain" for storing, developing, and organizing songs (lyrics, chords, tabs, audio, images) across web and mobile. Built with NestJS (API), Vite + React (web), and Expo (mobile), with shared packages and centralized tooling. See [CONTEXT.md](CONTEXT.md) for the domain glossary and [docs/adr/](docs/adr/) for architecture decisions.
 
 ## Table of Contents
 
@@ -23,8 +23,8 @@ This monorepo contains three complementary applications and several shared packa
 ### Applications
 
 - **API** ([`apps/api`](apps/api)) - NestJS backend server (Prisma + PostgreSQL, S3-compatible object storage)
-- **Web** ([`apps/web`](apps/web)) - Vite-powered React single-page application (the Songbook web client)
-- **Mobile** ([`apps/mobile`](apps/mobile)) - Expo (React Native) application (the Songbook mobile client)
+- **Web** ([`apps/web`](apps/web)) - Vite-powered React single-page application (the musicall web client)
+- **Mobile** ([`apps/mobile`](apps/mobile)) - Expo (React Native) application (the musicall mobile client)
 
 ### Shared Packages
 

@@ -22,14 +22,14 @@ export const queryClient = new QueryClient({
 
 const asyncStoragePersister: Persister = {
   persistClient: async (client) => {
-    await AsyncStorage.setItem("songbook.query-cache", JSON.stringify(client));
+    await AsyncStorage.setItem("musicall.query-cache", JSON.stringify(client));
   },
   restoreClient: async () => {
-    const cache = await AsyncStorage.getItem("songbook.query-cache");
+    const cache = await AsyncStorage.getItem("musicall.query-cache");
     return cache ? JSON.parse(cache) : undefined;
   },
   removeClient: async () => {
-    await AsyncStorage.removeItem("songbook.query-cache");
+    await AsyncStorage.removeItem("musicall.query-cache");
   },
 };
 

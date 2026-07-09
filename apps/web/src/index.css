@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
-/* Songbook design tokens — dark-only, tuned for stage/low-light use.
-   Source: design handoff (Songbook.dc.html). */
+/* musicall design tokens — dark-only, tuned for stage/low-light use.
+   Source: design handoff (musicall.dc.html). */
 @theme {
   --color-*: initial;
 

@@ -1,6 +1,6 @@
-# Songbook
+# musicall
 
-Songbook is a musician's "second brain": a place to capture, develop, and organize songs — finished or in progress — together with their lyrics, chords, tablatures, reference audio, and images, grouped into collections and synced across devices.
+musicall is a musician's "second brain": a place to capture, develop, and organize songs — finished or in progress — together with their lyrics, chords, tablatures, reference audio, and images, grouped into collections and synced across devices.
 
 The canonical language of the domain (code, database, API, and this glossary) is **English**. User-facing copy is **Portuguese (PT-BR)**; each term below lists its UI label.
 

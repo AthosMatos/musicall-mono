@@ -14,6 +14,7 @@ const API_PORT = 3000;
  * production and for custom setups).
  */
 function resolveApiBaseUrl(): string {
+  // `EXPO_PUBLIC_API_URL` always wins (use it in production and custom setups).
   const explicit = process.env.EXPO_PUBLIC_API_URL;
   if (explicit) return explicit;
 
@@ -39,8 +40,8 @@ if (__DEV__) {
   console.log(`[api] base URL: ${API_BASE_URL}`);
 }
 
-const ACCESS_KEY = "songbook.accessToken";
-const REFRESH_KEY = "songbook.refreshToken";
+const ACCESS_KEY = "musicall.accessToken";
+const REFRESH_KEY = "musicall.refreshToken";
 
 // In-memory access token; refresh token lives in the OS keychain (decision 3).
 let accessToken: string | null = null;

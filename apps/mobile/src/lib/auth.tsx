@@ -1,3 +1,5 @@
+import type { AuthTokens } from "@monorepo/core";
+import { authLogin, authLogout, authRegister, usersGetMe, type UserResponseDto } from "@monorepo/core/api";
 import {
   createContext,
   useCallback,
@@ -6,8 +8,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { AuthTokens } from "@monorepo/core";
-import { authLogin, authLogout, authRegister, usersGetMe, type UserResponseDto } from "@monorepo/core/api";
 import { clearTokens, getStoredRefreshToken, loadStoredAccessToken, setTokens } from "./api";
 import { queryClient } from "./query";
 
@@ -57,7 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      await finishSignIn(await authLogin({ email, password }));
+      try {
+        console.log("login called with", email, password);
+        const authlogin = await authLogin({ email, password })
+        console.log("authLogin returned", authlogin);
+        await finishSignIn(authlogin);
+      }
+      catch (error) {
+        console.error("Login failed:", error);
+        throw error; // rethrow the error after logging it
+      }
     },
     [finishSignIn],
   );
