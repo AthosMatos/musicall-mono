@@ -2,6 +2,11 @@
   "extends": "@monorepo/typescript-config/base.json",
   "compilerOptions": {
     "lib": ["ES2021", "DOM"],
+    // Emit native async/spread/optional-chaining so bunchee/SWC does not
+    // downlevel them into `@swc/helpers` imports (which Metro can't resolve
+    // from the built .mjs in this monorepo). All consumers — Hermes/RN,
+    // modern browsers via Vite, and Node — support ES2021 natively.
+    "target": "ES2021",
     "outDir": "./dist",
     "types": ["jest", "node"],
     "strictNullChecks": true
