@@ -34,7 +34,6 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix('api');
   app.use(cookieParser());
-  app.enableCors({ origin: config.get('WEB_ORIGIN'), credentials: true });
   app.enableCors({
     origin: [
       config.get('WEB_ORIGIN'),
