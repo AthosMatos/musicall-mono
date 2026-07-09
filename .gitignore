@@ -3,6 +3,8 @@
 node_modules/
 dist/
 
+.expo/
+
 .DS_Store
 node_modules
 .turbo

@@ -69,9 +69,9 @@ async function copyApk(type, targetName) {
 		await ensureDir(destDir);
 		const types = ["release", "debug"];
 		for (const t of types) {
-			const defaultName = `drdende_${t}`;
+			const defaultName = `musicall-aep_${t}`;
 			const name = await askQuestion(`Enter a version for ${t} apk`, defaultName);
-			await copyApk(t, `drdende_${t}_${name}`);
+			await copyApk(t, `musicall-aep_${t}_${name}`);
 		}
 		console.log("Done.");
 	} catch (err) {

@@ -1,0 +1,37 @@
+import { AppGradientView } from "@/components/ui/gradient-view";
+import { inPrimaryPageAtom } from "@root/src/atoms/pages";
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import { useAtomValue } from "jotai";
+import { ChevronLeft } from "lucide-react-native";
+import { TouchableOpacity } from "react-native";
+import Animated, { SlideInLeft, SlideOutLeft } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const logo = require('../../../assets/logo.png')
+
+const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity)
+
+export default function Header() {
+    const isInPrimaryPage = useAtomValue(inPrimaryPageAtom)
+    const { top } = useSafeAreaInsets()
+
+    return <AppGradientView colors={['#e6ebff', 'white']} start={{ x: 0.5, y: 0 }}
+        className={`items-center justify-center border-b border-b-stone-300`}
+        style={{ flex: 0, paddingTop: top, paddingBottom: top / 2 }}>
+        {!isInPrimaryPage && <AnimatedTouchable
+            entering={SlideInLeft.springify()}
+            exiting={SlideOutLeft}
+            style={{
+                top
+            }} className="absolute left-4 items-center justify-center h-full" hitSlop={12} onPress={() => router.back()}>
+            <ChevronLeft size={24} color={'#262626'} />
+        </AnimatedTouchable>}
+        <Image source={logo} style={{
+            width: 120, aspectRatio: 4.13,
+        }} />
+    </AppGradientView>
+
+
+
+}

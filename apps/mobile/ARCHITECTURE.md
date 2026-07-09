@@ -1,4 +1,4 @@
-# `apps/mobile-new` — Architecture Reference
+# `apps/mobile` — Architecture Reference
 
 Technical documentation of this app's structure and conventions, written to serve as the
 **reference architecture** for refactoring `apps/mobile` (the musicall mobile app). This app

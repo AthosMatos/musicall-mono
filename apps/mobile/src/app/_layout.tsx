@@ -1,78 +1,72 @@
-import {
-  BricolageGrotesque_400Regular,
-  BricolageGrotesque_500Medium,
-  BricolageGrotesque_600SemiBold,
-  BricolageGrotesque_700Bold,
-} from "@expo-google-fonts/bricolage-grotesque";
-import {
-  JetBrainsMono_400Regular,
-  JetBrainsMono_500Medium,
-  JetBrainsMono_600SemiBold,
-} from "@expo-google-fonts/jetbrains-mono";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useFonts } from "expo-font";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { jotaiStore } from "@/atoms/store";
+import { AppGradientView } from "@/components/ui/gradient-view";
+import { initQueryPersistence, QueryProvider } from "@/query-provider";
+import "@root/global.css";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, type ReactNode } from "react";
-import { View } from "react-native";
-import "@/lib/api"; // registers the axios ApiClient with the generated hooks
-import { AuthProvider, useAuth } from "@/lib/auth";
-import { initQueryPersistence, queryClient } from "@/lib/query";
-import { colors } from "@/theme";
+import { Provider as JotaiProvider } from "jotai";
+import { useEffect } from "react";
+import { Text } from "react-native";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import Animated, { SlideInUp, SlideOutUp } from "react-native-reanimated";
+import ToastManager from "toastify-react-native";
+import { AuthProvider, useAuth } from "../auth/auth.provider";
 
-function AuthGate({ children }: { children: ReactNode }) {
-  const { status } = useAuth();
-  const segments = useSegments();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "loading") return;
-    const inLogin = segments[0] === "login";
-    if (status === "signedOut" && !inLogin) router.replace("/login");
-    if (status === "signedIn" && inLogin) router.replace("/");
-  }, [status, segments, router]);
-
-  if (status === "loading") {
-    return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
-  }
-  return <>{children}</>;
+// Custom toast configuration
+const toastConfig = {
+  default: (props: any) => (
+    <Animated.View entering={SlideInUp.springify()} exiting={SlideOutUp} className="bg-white border-2 border-primary p-4 px-4 rounded-xl" >
+      <Text className="text-primary font-bold text-xl">{props.text1}</Text>
+      {props.text2 && <Text className="text-black" >{props.text2}</Text>}
+    </Animated.View>
+  ),
+  // Override other toast types as needed
 }
 
-export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
-    BricolageGrotesque_400Regular,
-    BricolageGrotesque_500Medium,
-    BricolageGrotesque_600SemiBold,
-    BricolageGrotesque_700Bold,
-    JetBrainsMono_400Regular,
-    JetBrainsMono_500Medium,
-    JetBrainsMono_600SemiBold,
-  });
+function RootNavigator() {
+  const { isLoggedIn } = useAuth();
 
   useEffect(() => {
     initQueryPersistence();
   }, []);
 
-  if (!fontsLoaded) {
-    return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
-  }
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <StatusBar style="light" />
-        <AuthGate>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.bg },
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="capture" options={{ presentation: "modal" }} />
-          </Stack>
-        </AuthGate>
-      </AuthProvider>
-    </QueryClientProvider>
+    <AppGradientView start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 1 }} colors={['#D9D9D9', '#FFFFFF']}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "slide_from_right",
+          contentStyle: {
+            backgroundColor: "transparent",
+          },
+        }}
+      >
+        <Stack.Protected guard={isLoggedIn}>
+          <Stack.Screen name="(protected)" />
+        </Stack.Protected>
+        <Stack.Protected guard={!isLoggedIn}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+      </Stack>
+    </AppGradientView>
   );
 }
+
+function RootLayout() {
+  return (
+    <JotaiProvider store={jotaiStore}>
+      <QueryProvider>
+        <AuthProvider>
+          <KeyboardProvider>
+            <StatusBar style="light" />
+            <RootNavigator />
+            <ToastManager animationStyle={'slide'} config={toastConfig} position="top" useModal={false} showProgressBar showCloseIcon />
+            {/* {modals.map((ModalComponent) => ModalComponent)} */}
+          </KeyboardProvider>
+        </AuthProvider>
+      </QueryProvider>
+    </JotaiProvider>
+  );
+}
+
+export default RootLayout;
