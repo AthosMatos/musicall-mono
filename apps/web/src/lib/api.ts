@@ -1,4 +1,5 @@
-import { ApiClient, configureApiClient, type AuthTokens } from "@monorepo/core";
+import type { AuthTokens } from "@monorepo/core";
+import { ApiClient, configureApiClient } from "@monorepo/core/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 

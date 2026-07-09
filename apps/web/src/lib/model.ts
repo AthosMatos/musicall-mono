@@ -1,9 +1,22 @@
-import type { CollectionStatus, SongStatus } from "@monorepo/core";
-import type { CollectionResponseDto, SongResponseDto } from "@monorepo/core/api";
+import type { CollectionStatus, CollectionType, SongStatus } from "@monorepo/core";
 
-// Presentation helpers mapping API DTOs to what the screens render.
+// Presentation helpers mapping API DTOs to what the screens render. Parameters
+// are structural because the codegen types list items as string unions but
+// single responses as TS enums — both satisfy these shapes.
 
 export type CoverVariant = "warm" | "neutral" | "terracotta" | "sage" | "demos" | "none";
+
+export interface SongLike {
+  id: string;
+  status: SongStatus;
+  key: string | null;
+  bpm: number | null;
+}
+
+export interface CollectionLike {
+  id: string;
+  type: CollectionType;
+}
 
 export const statusLabel: Record<SongStatus, string> = {
   draft: "rascunho",
@@ -27,22 +40,22 @@ function hash(id: string): number {
 }
 
 /** Deterministic placeholder gradient until real cover art (coverMediaId) is wired. */
-export function songCover(song: SongResponseDto): CoverVariant {
+export function songCover(song: SongLike): CoverVariant {
   if (song.status === "draft") return "none";
   return songVariants[hash(song.id) % songVariants.length];
 }
 
-export function collectionCover(collection: CollectionResponseDto): CoverVariant {
+export function collectionCover(collection: CollectionLike): CoverVariant {
   return collectionVariants[hash(collection.id) % collectionVariants.length];
 }
 
 /** "EP" for multi-track albums, "single" for singles — cover corner label. */
-export function collectionTypeLabel(collection: CollectionResponseDto): string {
+export function collectionTypeLabel(collection: CollectionLike): string {
   return collection.type === "single" ? "single" : "EP";
 }
 
 /** "Lá · 92 BPM", falling back to the status for metadata-less drafts. */
-export function songMeta(song: SongResponseDto): string {
+export function songMeta(song: SongLike): string {
   if (song.key && song.bpm) return `${song.key} · ${song.bpm} BPM`;
   if (song.key) return song.key;
   if (song.bpm) return `${song.bpm} BPM`;

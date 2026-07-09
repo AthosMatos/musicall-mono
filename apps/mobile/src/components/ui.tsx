@@ -1,9 +1,8 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { SongStatus } from "@monorepo/core";
-import type { CoverVariant } from "@/data/songbook";
+import type { CoverVariant } from "@/lib/model";
 import { colors, coverGradients, fonts, statusDotColor } from "@/theme";
 
 export function StatusDot({ status, size = 7 }: { status: SongStatus; size?: number }) {
@@ -110,36 +109,6 @@ export function Waveform({
       ))}
     </View>
   );
-}
-
-/** Mock playback clock — advances progress while "playing". */
-export function usePlayback(durationSeconds: number) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (!isPlaying) return;
-    timer.current = setInterval(() => {
-      setElapsed((t) => {
-        if (t + 0.25 >= durationSeconds) {
-          setIsPlaying(false);
-          return 0;
-        }
-        return t + 0.25;
-      });
-    }, 250);
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
-  }, [isPlaying, durationSeconds]);
-
-  return {
-    isPlaying,
-    elapsed,
-    progress: durationSeconds ? elapsed / durationSeconds : 0,
-    toggle: () => setIsPlaying((p) => !p),
-  };
 }
 
 export function formatTime(seconds: number): string {

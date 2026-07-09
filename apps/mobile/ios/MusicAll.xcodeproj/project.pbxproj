@@ -1,0 +1,577 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
+		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
+		6590278A744143ECADEEFA67 /* Oferta-do-Dia.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 07424B430D3C45B888EB5916 /* Oferta-do-Dia.ttf */; };
+		B3703A72526843DD8678AD5E /* FiraSans-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7CCC9D3F66404522858D204E /* FiraSans-Thin.ttf */; };
+		4B86B27944D146C996B4DC2A /* FiraSans-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CDC4CDF1AB0C419A92FDBE29 /* FiraSans-ThinItalic.ttf */; };
+		E2100808378B45B6BFAC98A8 /* FiraSans-UltraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BB1188BB3F7F48B6AF5C378B /* FiraSans-UltraLight.ttf */; };
+		B9026021A6FB4E2D859A34B0 /* FiraSans-UltraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 21FF34BA2333427EA239F86E /* FiraSans-UltraLightItalic.ttf */; };
+		2C4E849FF835432888E39E60 /* FiraSans-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 03C0AFEAA6294DCAAEFFA433 /* FiraSans-ExtraLight.ttf */; };
+		48C14F58EE594807906FAC0D /* FiraSans-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DC70E325C16C4981801327CB /* FiraSans-ExtraLightItalic.ttf */; };
+		BAAC4F886EB34B6E80F1651A /* FiraSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EB4111DB4C1E49F0B68EB4F9 /* FiraSans-Light.ttf */; };
+		EB857978FA714DF7AC66571A /* FiraSans-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6C1F5FF9AB6B494B9E2DB442 /* FiraSans-LightItalic.ttf */; };
+		BB90EBE3D51741AF870F28DB /* FiraSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD809C3FF941FB8E52197E /* FiraSans-Regular.ttf */; };
+		CA6A8827CA5C426C89300A8A /* FiraSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 74177143935749AA8A05A671 /* FiraSans-Italic.ttf */; };
+		027ED63854F64D12B8970691 /* FiraSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E3286BC4693E49A293AEC24A /* FiraSans-Medium.ttf */; };
+		838EBB6445AF49D9884C58A7 /* FiraSans-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FB745B243FCC425F926C1AEA /* FiraSans-MediumItalic.ttf */; };
+		A6EE39C710EE471CB405BBCD /* FiraSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A12F74B6699542478629A4A6 /* FiraSans-SemiBold.ttf */; };
+		B3FEA855F4EC426AA35C63BF /* FiraSans-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D3881B7156044D41B863EC21 /* FiraSans-SemiBoldItalic.ttf */; };
+		89AF569F27C64A4FB5FDDA0C /* FiraSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A8ACCCAE49AB4E4FA99BB4FA /* FiraSans-Bold.ttf */; };
+		CD24FDEB8F944B1394BF1562 /* FiraSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 262D591A11DF4F57A81D06F0 /* FiraSans-BoldItalic.ttf */; };
+		A81C17E8287248329E9076A5 /* FiraSans-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E702B11B335945B6A1574548 /* FiraSans-ExtraBold.ttf */; };
+		4DB4BF65A97A47C2910B7E64 /* FiraSans-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AF6D65065CA7418CA540FF0E /* FiraSans-ExtraBoldItalic.ttf */; };
+		289A8D090BF242A5B6FD6786 /* FiraSans-Heavy.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5DF1D72C0F73475BA97A2141 /* FiraSans-Heavy.ttf */; };
+		28FB651DB8CD4283B2949EFD /* FiraSans-HeavyItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 33DB8BF6E95B4073A4EA5AF2 /* FiraSans-HeavyItalic.ttf */; };
+		5A9EDE6DCA484435A1CE059B /* FiraSans-Ultra.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 69EFCD0826624AFC8EC6916E /* FiraSans-Ultra.ttf */; };
+		D367AF7464A747129A575A75 /* FiraSans-UltraItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2AD4A66C2DE14940857E42C1 /* FiraSans-UltraItalic.ttf */; };
+		82EBB7FF00E74720A1E98322 /* FiraSans-Book.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F6E774091518470B9B3AB7C5 /* FiraSans-Book.ttf */; };
+		4CE56D742EF54FE9B319886B /* FiraSans-BookItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 797C756088C64D8AAF546CB9 /* FiraSans-BookItalic.ttf */; };
+		0ECF72668DE44B0FB6848E8E /* FiraSans-Hair.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4213283A0E9B4E73A6D78122 /* FiraSans-Hair.ttf */; };
+		ABB7D523F53E4A8CBF05E1C9 /* FiraSans-HairItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 24226ABF56EE479BAEA1C8F7 /* FiraSans-HairItalic.ttf */; };
+		F4139E70D78344F2A9BE4184 /* FiraSans-Eight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8C0C610208D846D3AED9014A /* FiraSans-Eight.ttf */; };
+		8753AD8EDBA64C7C840A1062 /* FiraSans-EightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D1EDB3C7BB4473E9754CFE8 /* FiraSans-EightItalic.ttf */; };
+		0FA1C81952DB4B0488A6F04D /* FiraSans-Four.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0851B32DBBCA4B12930F8304 /* FiraSans-Four.ttf */; };
+		EFB862D838BB479DAD786425 /* FiraSans-FourItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CF4FDE777F7A4519A28A02EC /* FiraSans-FourItalic.ttf */; };
+		82AE3171734D430D8C9459E2 /* FiraSans-Two.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A2EC546473D849D7B0954502 /* FiraSans-Two.ttf */; };
+		153C5181F0AD4C8E8248C1D0 /* FiraSans-TwoItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0A7AAC0EFE2C4A04A2927CD6 /* FiraSans-TwoItalic.ttf */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		13B07F961A680F5B00A75B9A /* MusicAll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MusicAll.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = MusicAll/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = MusicAll/Info.plist; sourceTree = "<group>"; };
+		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = MusicAll/SplashScreen.storyboard; sourceTree = "<group>"; };
+		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = MusicAll/AppDelegate.swift; sourceTree = "<group>"; };
+		F11748442D0722820044C1D9 /* MusicAll-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "MusicAll-Bridging-Header.h"; path = "MusicAll/MusicAll-Bridging-Header.h"; sourceTree = "<group>"; };
+		07424B430D3C45B888EB5916 /* Oferta-do-Dia.ttf */ = {isa = PBXFileReference; name = "Oferta-do-Dia.ttf"; path = "../fonts/Oferta-do-Dia.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		7CCC9D3F66404522858D204E /* FiraSans-Thin.ttf */ = {isa = PBXFileReference; name = "FiraSans-Thin.ttf"; path = "../fonts/FiraSans-Thin.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		CDC4CDF1AB0C419A92FDBE29 /* FiraSans-ThinItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-ThinItalic.ttf"; path = "../fonts/FiraSans-ThinItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		BB1188BB3F7F48B6AF5C378B /* FiraSans-UltraLight.ttf */ = {isa = PBXFileReference; name = "FiraSans-UltraLight.ttf"; path = "../fonts/FiraSans-UltraLight.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		21FF34BA2333427EA239F86E /* FiraSans-UltraLightItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-UltraLightItalic.ttf"; path = "../fonts/FiraSans-UltraLightItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		03C0AFEAA6294DCAAEFFA433 /* FiraSans-ExtraLight.ttf */ = {isa = PBXFileReference; name = "FiraSans-ExtraLight.ttf"; path = "../fonts/FiraSans-ExtraLight.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		DC70E325C16C4981801327CB /* FiraSans-ExtraLightItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-ExtraLightItalic.ttf"; path = "../fonts/FiraSans-ExtraLightItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		EB4111DB4C1E49F0B68EB4F9 /* FiraSans-Light.ttf */ = {isa = PBXFileReference; name = "FiraSans-Light.ttf"; path = "../fonts/FiraSans-Light.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		6C1F5FF9AB6B494B9E2DB442 /* FiraSans-LightItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-LightItalic.ttf"; path = "../fonts/FiraSans-LightItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		2FAD809C3FF941FB8E52197E /* FiraSans-Regular.ttf */ = {isa = PBXFileReference; name = "FiraSans-Regular.ttf"; path = "../fonts/FiraSans-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		74177143935749AA8A05A671 /* FiraSans-Italic.ttf */ = {isa = PBXFileReference; name = "FiraSans-Italic.ttf"; path = "../fonts/FiraSans-Italic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		E3286BC4693E49A293AEC24A /* FiraSans-Medium.ttf */ = {isa = PBXFileReference; name = "FiraSans-Medium.ttf"; path = "../fonts/FiraSans-Medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		FB745B243FCC425F926C1AEA /* FiraSans-MediumItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-MediumItalic.ttf"; path = "../fonts/FiraSans-MediumItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		A12F74B6699542478629A4A6 /* FiraSans-SemiBold.ttf */ = {isa = PBXFileReference; name = "FiraSans-SemiBold.ttf"; path = "../fonts/FiraSans-SemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		D3881B7156044D41B863EC21 /* FiraSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-SemiBoldItalic.ttf"; path = "../fonts/FiraSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		A8ACCCAE49AB4E4FA99BB4FA /* FiraSans-Bold.ttf */ = {isa = PBXFileReference; name = "FiraSans-Bold.ttf"; path = "../fonts/FiraSans-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		262D591A11DF4F57A81D06F0 /* FiraSans-BoldItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-BoldItalic.ttf"; path = "../fonts/FiraSans-BoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		E702B11B335945B6A1574548 /* FiraSans-ExtraBold.ttf */ = {isa = PBXFileReference; name = "FiraSans-ExtraBold.ttf"; path = "../fonts/FiraSans-ExtraBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		AF6D65065CA7418CA540FF0E /* FiraSans-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-ExtraBoldItalic.ttf"; path = "../fonts/FiraSans-ExtraBoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		5DF1D72C0F73475BA97A2141 /* FiraSans-Heavy.ttf */ = {isa = PBXFileReference; name = "FiraSans-Heavy.ttf"; path = "../fonts/FiraSans-Heavy.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		33DB8BF6E95B4073A4EA5AF2 /* FiraSans-HeavyItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-HeavyItalic.ttf"; path = "../fonts/FiraSans-HeavyItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		69EFCD0826624AFC8EC6916E /* FiraSans-Ultra.ttf */ = {isa = PBXFileReference; name = "FiraSans-Ultra.ttf"; path = "../fonts/FiraSans-Ultra.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		2AD4A66C2DE14940857E42C1 /* FiraSans-UltraItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-UltraItalic.ttf"; path = "../fonts/FiraSans-UltraItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F6E774091518470B9B3AB7C5 /* FiraSans-Book.ttf */ = {isa = PBXFileReference; name = "FiraSans-Book.ttf"; path = "../fonts/FiraSans-Book.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		797C756088C64D8AAF546CB9 /* FiraSans-BookItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-BookItalic.ttf"; path = "../fonts/FiraSans-BookItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		4213283A0E9B4E73A6D78122 /* FiraSans-Hair.ttf */ = {isa = PBXFileReference; name = "FiraSans-Hair.ttf"; path = "../fonts/FiraSans-Hair.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		24226ABF56EE479BAEA1C8F7 /* FiraSans-HairItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-HairItalic.ttf"; path = "../fonts/FiraSans-HairItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		8C0C610208D846D3AED9014A /* FiraSans-Eight.ttf */ = {isa = PBXFileReference; name = "FiraSans-Eight.ttf"; path = "../fonts/FiraSans-Eight.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		8D1EDB3C7BB4473E9754CFE8 /* FiraSans-EightItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-EightItalic.ttf"; path = "../fonts/FiraSans-EightItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		0851B32DBBCA4B12930F8304 /* FiraSans-Four.ttf */ = {isa = PBXFileReference; name = "FiraSans-Four.ttf"; path = "../fonts/FiraSans-Four.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		CF4FDE777F7A4519A28A02EC /* FiraSans-FourItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-FourItalic.ttf"; path = "../fonts/FiraSans-FourItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		A2EC546473D849D7B0954502 /* FiraSans-Two.ttf */ = {isa = PBXFileReference; name = "FiraSans-Two.ttf"; path = "../fonts/FiraSans-Two.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		0A7AAC0EFE2C4A04A2927CD6 /* FiraSans-TwoItalic.ttf */ = {isa = PBXFileReference; name = "FiraSans-TwoItalic.ttf"; path = "../fonts/FiraSans-TwoItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		13B07FAE1A68108700A75B9A /* MusicAll */ = {
+			isa = PBXGroup;
+			children = (
+				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
+				F11748442D0722820044C1D9 /* MusicAll-Bridging-Header.h */,
+				BB2F792B24A3F905000567C9 /* Supporting */,
+				13B07FB51A68108700A75B9A /* Images.xcassets */,
+				13B07FB61A68108700A75B9A /* Info.plist */,
+				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
+			);
+			name = MusicAll;
+			sourceTree = "<group>";
+		};
+		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		83CBB9F61A601CBA00E9B192 = {
+			isa = PBXGroup;
+			children = (
+				13B07FAE1A68108700A75B9A /* MusicAll */,
+				832341AE1AAA6A7D00B99B32 /* Libraries */,
+				83CBBA001A601CBA00E9B192 /* Products */,
+				2D16E6871FA4F8E400B85C8A /* Frameworks */,
+				1D2159074D9E46678250AC2F /* Resources */,
+			);
+			indentWidth = 2;
+			sourceTree = "<group>";
+			tabWidth = 2;
+			usesTabs = 0;
+		};
+		83CBBA001A601CBA00E9B192 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				13B07F961A680F5B00A75B9A /* MusicAll.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BB2F792B24A3F905000567C9 /* Supporting */ = {
+			isa = PBXGroup;
+			children = (
+				BB2F792C24A3F905000567C9 /* Expo.plist */,
+			);
+			name = Supporting;
+			path = MusicAll/Supporting;
+			sourceTree = "<group>";
+		};
+		1D2159074D9E46678250AC2F /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				07424B430D3C45B888EB5916 /* Oferta-do-Dia.ttf */,
+				7CCC9D3F66404522858D204E /* FiraSans-Thin.ttf */,
+				CDC4CDF1AB0C419A92FDBE29 /* FiraSans-ThinItalic.ttf */,
+				BB1188BB3F7F48B6AF5C378B /* FiraSans-UltraLight.ttf */,
+				21FF34BA2333427EA239F86E /* FiraSans-UltraLightItalic.ttf */,
+				03C0AFEAA6294DCAAEFFA433 /* FiraSans-ExtraLight.ttf */,
+				DC70E325C16C4981801327CB /* FiraSans-ExtraLightItalic.ttf */,
+				EB4111DB4C1E49F0B68EB4F9 /* FiraSans-Light.ttf */,
+				6C1F5FF9AB6B494B9E2DB442 /* FiraSans-LightItalic.ttf */,
+				2FAD809C3FF941FB8E52197E /* FiraSans-Regular.ttf */,
+				74177143935749AA8A05A671 /* FiraSans-Italic.ttf */,
+				E3286BC4693E49A293AEC24A /* FiraSans-Medium.ttf */,
+				FB745B243FCC425F926C1AEA /* FiraSans-MediumItalic.ttf */,
+				A12F74B6699542478629A4A6 /* FiraSans-SemiBold.ttf */,
+				D3881B7156044D41B863EC21 /* FiraSans-SemiBoldItalic.ttf */,
+				A8ACCCAE49AB4E4FA99BB4FA /* FiraSans-Bold.ttf */,
+				262D591A11DF4F57A81D06F0 /* FiraSans-BoldItalic.ttf */,
+				E702B11B335945B6A1574548 /* FiraSans-ExtraBold.ttf */,
+				AF6D65065CA7418CA540FF0E /* FiraSans-ExtraBoldItalic.ttf */,
+				5DF1D72C0F73475BA97A2141 /* FiraSans-Heavy.ttf */,
+				33DB8BF6E95B4073A4EA5AF2 /* FiraSans-HeavyItalic.ttf */,
+				69EFCD0826624AFC8EC6916E /* FiraSans-Ultra.ttf */,
+				2AD4A66C2DE14940857E42C1 /* FiraSans-UltraItalic.ttf */,
+				F6E774091518470B9B3AB7C5 /* FiraSans-Book.ttf */,
+				797C756088C64D8AAF546CB9 /* FiraSans-BookItalic.ttf */,
+				4213283A0E9B4E73A6D78122 /* FiraSans-Hair.ttf */,
+				24226ABF56EE479BAEA1C8F7 /* FiraSans-HairItalic.ttf */,
+				8C0C610208D846D3AED9014A /* FiraSans-Eight.ttf */,
+				8D1EDB3C7BB4473E9754CFE8 /* FiraSans-EightItalic.ttf */,
+				0851B32DBBCA4B12930F8304 /* FiraSans-Four.ttf */,
+				CF4FDE777F7A4519A28A02EC /* FiraSans-FourItalic.ttf */,
+				A2EC546473D849D7B0954502 /* FiraSans-Two.ttf */,
+				0A7AAC0EFE2C4A04A2927CD6 /* FiraSans-TwoItalic.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		13B07F861A680F5B00A75B9A /* MusicAll */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "MusicAll" */;
+			buildPhases = (
+				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
+				13B07F871A680F5B00A75B9A /* Sources */,
+				13B07F8C1A680F5B00A75B9A /* Frameworks */,
+				13B07F8E1A680F5B00A75B9A /* Resources */,
+				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MusicAll;
+			productName = MusicAll;
+			productReference = 13B07F961A680F5B00A75B9A /* MusicAll.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		83CBB9F71A601CBA00E9B192 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1130;
+				TargetAttributes = {
+					13B07F861A680F5B00A75B9A = {
+						LastSwiftMigration = 1250;
+					};
+				};
+			};
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "MusicAll" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 83CBB9F61A601CBA00E9B192;
+			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				13B07F861A680F5B00A75B9A /* MusicAll */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		13B07F8E1A680F5B00A75B9A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
+				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
+				6590278A744143ECADEEFA67 /* Oferta-do-Dia.ttf in Resources */,
+				B3703A72526843DD8678AD5E /* FiraSans-Thin.ttf in Resources */,
+				4B86B27944D146C996B4DC2A /* FiraSans-ThinItalic.ttf in Resources */,
+				E2100808378B45B6BFAC98A8 /* FiraSans-UltraLight.ttf in Resources */,
+				B9026021A6FB4E2D859A34B0 /* FiraSans-UltraLightItalic.ttf in Resources */,
+				2C4E849FF835432888E39E60 /* FiraSans-ExtraLight.ttf in Resources */,
+				48C14F58EE594807906FAC0D /* FiraSans-ExtraLightItalic.ttf in Resources */,
+				BAAC4F886EB34B6E80F1651A /* FiraSans-Light.ttf in Resources */,
+				EB857978FA714DF7AC66571A /* FiraSans-LightItalic.ttf in Resources */,
+				BB90EBE3D51741AF870F28DB /* FiraSans-Regular.ttf in Resources */,
+				CA6A8827CA5C426C89300A8A /* FiraSans-Italic.ttf in Resources */,
+				027ED63854F64D12B8970691 /* FiraSans-Medium.ttf in Resources */,
+				838EBB6445AF49D9884C58A7 /* FiraSans-MediumItalic.ttf in Resources */,
+				A6EE39C710EE471CB405BBCD /* FiraSans-SemiBold.ttf in Resources */,
+				B3FEA855F4EC426AA35C63BF /* FiraSans-SemiBoldItalic.ttf in Resources */,
+				89AF569F27C64A4FB5FDDA0C /* FiraSans-Bold.ttf in Resources */,
+				CD24FDEB8F944B1394BF1562 /* FiraSans-BoldItalic.ttf in Resources */,
+				A81C17E8287248329E9076A5 /* FiraSans-ExtraBold.ttf in Resources */,
+				4DB4BF65A97A47C2910B7E64 /* FiraSans-ExtraBoldItalic.ttf in Resources */,
+				289A8D090BF242A5B6FD6786 /* FiraSans-Heavy.ttf in Resources */,
+				28FB651DB8CD4283B2949EFD /* FiraSans-HeavyItalic.ttf in Resources */,
+				5A9EDE6DCA484435A1CE059B /* FiraSans-Ultra.ttf in Resources */,
+				D367AF7464A747129A575A75 /* FiraSans-UltraItalic.ttf in Resources */,
+				82EBB7FF00E74720A1E98322 /* FiraSans-Book.ttf in Resources */,
+				4CE56D742EF54FE9B319886B /* FiraSans-BookItalic.ttf in Resources */,
+				0ECF72668DE44B0FB6848E8E /* FiraSans-Hair.ttf in Resources */,
+				ABB7D523F53E4A8CBF05E1C9 /* FiraSans-HairItalic.ttf in Resources */,
+				F4139E70D78344F2A9BE4184 /* FiraSans-Eight.ttf in Resources */,
+				8753AD8EDBA64C7C840A1062 /* FiraSans-EightItalic.ttf in Resources */,
+				0FA1C81952DB4B0488A6F04D /* FiraSans-Four.ttf in Resources */,
+				EFB862D838BB479DAD786425 /* FiraSans-FourItalic.ttf in Resources */,
+				82AE3171734D430D8C9459E2 /* FiraSans-Two.ttf in Resources */,
+				153C5181F0AD4C8E8248C1D0 /* FiraSans-TwoItalic.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.xcode.env",
+				"$(SRCROOT)/.xcode.env.local",
+			);
+			name = "Bundle React Native code and images";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n# Source .xcode.env.updates if it exists to allow\n# SKIP_BUNDLING to be unset if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.updates\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.updates\"\nfi\n# Source local changes to allow overrides\n# if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
+		};
+		08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MusicAll-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MusicAll/Pods-MusicAll-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXUpdates/EXUpdates.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/RCTI18nStrings.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXConstants.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXUpdates.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCTI18nStrings.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MusicAll/Pods-MusicAll-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		13B07F871A680F5B00A75B9A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		13B07F941A680F5B00A75B9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_BITCODE = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"FB_SONARKIT_ENABLED=1",
+				);
+				INFOPLIST_FILE = MusicAll/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.musicall.ios";
+				PRODUCT_NAME = "MusicAll";
+				SWIFT_OBJC_BRIDGING_HEADER = "MusicAll/MusicAll-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				CODE_SIGN_ENTITLEMENTS = MusicAll/MusicAll.entitlements;
+			};
+			name = Debug;
+		};
+		13B07F951A680F5B00A75B9A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = MusicAll/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.musicall.ios";
+				PRODUCT_NAME = "MusicAll";
+				SWIFT_OBJC_BRIDGING_HEADER = "MusicAll/MusicAll-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				CODE_SIGN_ENTITLEMENTS = MusicAll/MusicAll.entitlements;
+			};
+			name = Release;
+		};
+		83CBBA201A601CBA00E9B192 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = "\"$(inherited)\"";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		83CBBA211A601CBA00E9B192 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = "\"$(inherited)\"";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "MusicAll" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				13B07F941A680F5B00A75B9A /* Debug */,
+				13B07F951A680F5B00A75B9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "MusicAll" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83CBBA201A601CBA00E9B192 /* Debug */,
+				83CBBA211A601CBA00E9B192 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
+}

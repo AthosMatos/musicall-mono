@@ -1,24 +1,264 @@
 {
-  "expo": {
-    "name": "Songbook",
-    "slug": "songbook",
-    "version": "0.0.0",
-    "scheme": "songbook",
-    "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSMicrophoneUsageDescription": "Songbook usa o microfone para gravar áudios de referência das suas músicas."
-      }
-    },
-    "android": {
-      "permissions": ["RECORD_AUDIO"]
-    },
-    "plugins": ["expo-router", "expo-secure-store"],
-    "experiments": {
-      "typedRoutes": true
-    }
-  }
+	"expo": {
+		"name": "MusicAll",
+		"slug": "musicall",
+		"version": "1.1.2",
+		"runtimeVersion": "0.0.0",
+		"orientation": "portrait",
+		"icon": "./assets/icon.png",
+		"scheme": "musicall",
+		"userInterfaceStyle": "automatic",
+		"newArchEnabled": true,
+		"ios": {
+			  "usesAppleSignIn": true,
+			"supportsTablet": true,
+			"bundleIdentifier": "com.musicall.ios",
+			"buildNumber": "1",
+			"infoPlist": {
+				"ITSAppUsesNonExemptEncryption": false
+			}
+		},
+		"android": {
+			"adaptiveIcon": {
+				"backgroundColor": "#FFD700",
+				"foregroundImage": "./assets/android-icons/android-icon-foreground.png",
+				"backgroundImage": "./assets/android-icons/android-icon-background.png",
+				"monochromeImage": "./assets/android-icons/android-icon-monochrome.png"
+			},
+			"config": {
+				
+			},
+			"edgeToEdgeEnabled": true,
+			"predictiveBackGestureEnabled": false,
+			"package": "com.musicall.android",
+			"versionCode": 1,
+			"permissions": [
+				"android.permission.ACCESS_COARSE_LOCATION",
+				"android.permission.ACCESS_FINE_LOCATION",
+				"android.permission.CAMERA"
+			]
+		},
+		"plugins": [
+			"./plugins/withKotlinJvmTarget",
+			"./plugins/withIosModularHeaders",
+			"expo-router",
+			["react-native-edge-to-edge", {}],
+			"expo-apple-authentication",
+			[
+				"expo-font",
+				{
+					"fonts": [
+						"./fonts/Oferta-do-Dia.ttf",
+						"./fonts/FiraSans-Thin.ttf",
+						"./fonts/FiraSans-ThinItalic.ttf",
+						"./fonts/FiraSans-UltraLight.ttf",
+						"./fonts/FiraSans-UltraLightItalic.ttf",
+						"./fonts/FiraSans-ExtraLight.ttf",
+						"./fonts/FiraSans-ExtraLightItalic.ttf",
+						"./fonts/FiraSans-Light.ttf",
+						"./fonts/FiraSans-LightItalic.ttf",
+						"./fonts/FiraSans-Regular.ttf",
+						"./fonts/FiraSans-Italic.ttf",
+						"./fonts/FiraSans-Medium.ttf",
+						"./fonts/FiraSans-MediumItalic.ttf",
+						"./fonts/FiraSans-SemiBold.ttf",
+						"./fonts/FiraSans-SemiBoldItalic.ttf",
+						"./fonts/FiraSans-Bold.ttf",
+						"./fonts/FiraSans-BoldItalic.ttf",
+						"./fonts/FiraSans-ExtraBold.ttf",
+						"./fonts/FiraSans-ExtraBoldItalic.ttf",
+						"./fonts/FiraSans-Heavy.ttf",
+						"./fonts/FiraSans-HeavyItalic.ttf",
+						"./fonts/FiraSans-Ultra.ttf",
+						"./fonts/FiraSans-UltraItalic.ttf",
+						"./fonts/FiraSans-Book.ttf",
+						"./fonts/FiraSans-BookItalic.ttf",
+						"./fonts/FiraSans-Hair.ttf",
+						"./fonts/FiraSans-HairItalic.ttf",
+						"./fonts/FiraSans-Eight.ttf",
+						"./fonts/FiraSans-EightItalic.ttf",
+						"./fonts/FiraSans-Four.ttf",
+						"./fonts/FiraSans-FourItalic.ttf",
+						"./fonts/FiraSans-Two.ttf",
+						"./fonts/FiraSans-TwoItalic.ttf"
+					],
+					"android": {
+						"fonts": [
+							{
+								"fontFamily": "FiraSans",
+								"fontDefinitions": [
+									{
+										"path": "./fonts/FiraSans-Thin.ttf",
+										"weight": 100,
+										"style": "normal"
+									},
+									{
+										"path": "./fonts/FiraSans-ThinItalic.ttf",
+										"weight": 100,
+										"style": "italic"
+									},
+									{
+										"path": "./fonts/FiraSans-ExtraLight.ttf",
+										"weight": 200,
+										"style": "normal"
+									},
+									{
+										"path": "./fonts/FiraSans-ExtraLightItalic.ttf",
+										"weight": 200,
+										"style": "italic"
+									},
+									{
+										"path": "./fonts/FiraSans-Light.ttf",
+										"weight": 300,
+										"style": "normal"
+									},
+									{
+										"path": "./fonts/FiraSans-LightItalic.ttf",
+										"weight": 300,
+										"style": "italic"
+									},
+									{
+										"path": "./fonts/FiraSans-Regular.ttf",
+										"weight": 400,
+										"style": "normal"
+									},
+									{
+										"path": "./fonts/FiraSans-Italic.ttf",
+										"weight": 400,
+										"style": "italic"
+									},
+									{
+										"path": "./fonts/FiraSans-Medium.ttf",
+										"weight": 500,
+										"style": "normal"
+									},
+									{
+										"path": "./fonts/FiraSans-MediumItalic.ttf",
+										"weight": 500,
+										"style": "italic"
+									},
+									{
+										"path": "./fonts/FiraSans-SemiBold.ttf",
+										"weight": 600,
+										"style": "normal"
+									},
+									{
+										"path": "./fonts/FiraSans-SemiBoldItalic.ttf",
+										"weight": 600,
+										"style": "italic"
+									},
+									{
+										"path": "./fonts/FiraSans-Bold.ttf",
+										"weight": 700,
+										"style": "normal"
+									},
+									{
+										"path": "./fonts/FiraSans-BoldItalic.ttf",
+										"weight": 700,
+										"style": "italic"
+									},
+									{
+										"path": "./fonts/FiraSans-ExtraBold.ttf",
+										"weight": 800,
+										"style": "normal"
+									},
+									{
+										"path": "./fonts/FiraSans-ExtraBoldItalic.ttf",
+										"weight": 800,
+										"style": "italic"
+									},
+									{
+										"path": "./fonts/FiraSans-Heavy.ttf",
+										"weight": 900,
+										"style": "normal"
+									},
+									{
+										"path": "./fonts/FiraSans-HeavyItalic.ttf",
+										"weight": 900,
+										"style": "italic"
+									}
+								]
+							}
+						]
+					},
+					"ios": {
+						"fonts": [
+							"./fonts/FiraSans-Thin.ttf",
+							"./fonts/FiraSans-ThinItalic.ttf",
+							"./fonts/FiraSans-UltraLight.ttf",
+							"./fonts/FiraSans-UltraLightItalic.ttf",
+							"./fonts/FiraSans-ExtraLight.ttf",
+							"./fonts/FiraSans-ExtraLightItalic.ttf",
+							"./fonts/FiraSans-Light.ttf",
+							"./fonts/FiraSans-LightItalic.ttf",
+							"./fonts/FiraSans-Regular.ttf",
+							"./fonts/FiraSans-Italic.ttf",
+							"./fonts/FiraSans-Medium.ttf",
+							"./fonts/FiraSans-MediumItalic.ttf",
+							"./fonts/FiraSans-SemiBold.ttf",
+							"./fonts/FiraSans-SemiBoldItalic.ttf",
+							"./fonts/FiraSans-Bold.ttf",
+							"./fonts/FiraSans-BoldItalic.ttf",
+							"./fonts/FiraSans-ExtraBold.ttf",
+							"./fonts/FiraSans-ExtraBoldItalic.ttf",
+							"./fonts/FiraSans-Heavy.ttf",
+							"./fonts/FiraSans-HeavyItalic.ttf",
+							"./fonts/FiraSans-Ultra.ttf",
+							"./fonts/FiraSans-UltraItalic.ttf",
+							"./fonts/FiraSans-Book.ttf",
+							"./fonts/FiraSans-BookItalic.ttf",
+							"./fonts/FiraSans-Hair.ttf",
+							"./fonts/FiraSans-HairItalic.ttf",
+							"./fonts/FiraSans-Eight.ttf",
+							"./fonts/FiraSans-EightItalic.ttf",
+							"./fonts/FiraSans-Four.ttf",
+							"./fonts/FiraSans-FourItalic.ttf",
+							"./fonts/FiraSans-Two.ttf",
+							"./fonts/FiraSans-TwoItalic.ttf"
+						]
+					}
+				}
+			],
+			[
+				"expo-splash-screen",
+				{
+					"backgroundColor": "#ffffff",
+					"image": "./assets/splash-icon.png",
+					"imageWidth": 200
+				}
+			],
+			[
+				"expo-build-properties",
+				{
+					"android": {
+						"usesCleartextTraffic": true,
+						"reactNativeReleaseLevel": "experimental"
+					}
+				}
+			],
+			[
+				"expo-asset"
+			],
+			[
+				"expo-location",
+				{
+					"locationAlwaysAndWhenInUsePermission": "A localização é utilizada para identificar sua posição."
+				}
+			],
+			"@react-native-community/datetimepicker",
+			"expo-web-browser"
+		],
+		"experiments": {
+			"typedRoutes": true,
+			"reactCompiler": true,
+			"tsconfigPaths": true
+		},
+		"extra": {
+			"router": {
+				"root": "./src/app"
+			}
+			
+		},
+		"owner": "athosladies"
+	}
 }

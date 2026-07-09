@@ -29,8 +29,8 @@ export default function SongDetailPage() {
   const mediaQuery = useQuery({ ...mediaListForSongOptions(id), enabled: !!id });
 
   const song = songQuery.data;
-  const versions = lyricsQuery.data?.items ?? [];
-  const audio = (mediaQuery.data?.items ?? []).find((m) => m.type === "audio");
+  const versions = lyricsQuery.data ?? [];
+  const audio = (mediaQuery.data ?? []).find((m) => m.type === "audio");
 
   if (songQuery.isLoading) {
     return <div className="min-h-svh bg-bg p-10 font-mono text-sm text-faint">carregando…</div>;
@@ -43,8 +43,8 @@ export default function SongDetailPage() {
     versions.find((v) => v.id === activeVersionId) ??
     versions.find((v) => v.isPrimary) ??
     versions[0];
-  const chordChart = chordsQuery.data?.items?.[0];
-  const tablature = tabsQuery.data?.items?.[0];
+  const chordChart = chordsQuery.data?.[0];
+  const tablature = tabsQuery.data?.[0];
 
   return (
     <div className="flex min-h-svh flex-col bg-bg">

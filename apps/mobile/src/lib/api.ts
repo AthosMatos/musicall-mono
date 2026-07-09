@@ -1,4 +1,5 @@
-import { ApiClient, configureApiClient, type AuthTokens } from "@monorepo/core";
+import type { AuthTokens } from "@monorepo/core";
+import { ApiClient, configureApiClient } from "@monorepo/core/api";
 import * as SecureStore from "expo-secure-store";
 
 const API_BASE_URL =
@@ -22,6 +23,10 @@ export async function setTokens(tokens: AuthTokens): Promise<void> {
   }
 }
 
+export async function getStoredRefreshToken(): Promise<string | null> {
+  return SecureStore.getItemAsync(REFRESH_KEY);
+}
+
 export async function clearTokens(): Promise<void> {
   accessToken = null;
   await SecureStore.deleteItemAsync(ACCESS_KEY);
@@ -36,7 +41,7 @@ export const api: ApiClient = new ApiClient({
     const refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);
     if (!refreshToken) return null;
     try {
-      const tokens = await api.request<AuthTokens>("/auth/refresh", {
+      const tokens = await api.request<AuthTokens>("/api/auth/refresh", {
         method: "POST",
         body: { refreshToken },
         anonymous: true,

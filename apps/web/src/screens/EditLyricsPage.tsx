@@ -1,29 +1,49 @@
 import { useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  lyricsCreateOptions,
+  lyricsListKey,
+  lyricsListOptions,
+  songsGetOptions,
+  type LyricVersionListDto,
+  type SongResponseDto,
+} from "@monorepo/core/api";
 import { MetaChip, MonoLabel } from "../components/primitives";
-import { getSong, primaryVersion, type LyricSection } from "../data/songbook";
-
-function sectionsToText(sections: LyricSection[]): string {
-  return sections
-    .map((s) => [`[${s.label}]`, ...s.lines].join("\n"))
-    .join("\n\n");
-}
+import { shortDate } from "../lib/model";
 
 const insertableSections = ["verso", "refrão", "ponte", "pré"];
 
 export default function EditLyricsPage() {
-  const { id } = useParams();
+  const { id = "" } = useParams();
+  const songQuery = useQuery({ ...songsGetOptions(id), enabled: !!id });
+  const lyricsQuery = useQuery({ ...lyricsListOptions(id), enabled: !!id });
+
+  if (songQuery.isLoading || lyricsQuery.isLoading) {
+    return <div className="min-h-svh bg-bg p-10 font-mono text-sm text-faint">carregando…</div>;
+  }
+  if (!songQuery.data) {
+    return <div className="min-h-svh bg-bg p-10 font-mono text-sm text-meta">música não encontrada</div>;
+  }
+  return <Editor song={songQuery.data} versions={lyricsQuery.data ?? []} />;
+}
+
+function Editor({ song, versions }: { song: SongResponseDto; versions: LyricVersionListDto }) {
   const navigate = useNavigate();
-  const song = getSong(id);
-  const base = song ? primaryVersion(song) : undefined;
-  const [text, setText] = useState(() => (base ? sectionsToText(base.sections) : ""));
+  const queryClient = useQueryClient();
+  const base = versions.find((v) => v.isPrimary) ?? versions[0];
+  const [text, setText] = useState(base?.content ?? "");
   const editorRef = useRef<HTMLTextAreaElement>(null);
 
-  if (!song) {
-    return <div className="p-10 font-mono text-sm text-meta">música não encontrada</div>;
-  }
+  const nextVersionNumber = versions.length + 1;
 
-  const nextVersionNumber = song.versions.length + 1;
+  const saveVersion = useMutation({
+    ...lyricsCreateOptions(),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: lyricsListKey(song.id) });
+      navigate(`/songs/${song.id}`);
+    },
+  });
 
   function insertSection(name: string) {
     const editor = editorRef.current;
@@ -37,6 +57,13 @@ export default function EditLyricsPage() {
     requestAnimationFrame(() => {
       editor.focus();
       editor.selectionStart = editor.selectionEnd = at + marker.length;
+    });
+  }
+
+  function save() {
+    saveVersion.mutate({
+      songId: song.id,
+      body: { label: `v${nextVersionNumber}`, content: text, isPrimary: true },
     });
   }
 
@@ -55,10 +82,11 @@ export default function EditLyricsPage() {
         </MetaChip>
         <button
           type="button"
-          onClick={() => navigate(`/songs/${song.id}`)}
-          className="flex h-10 cursor-pointer items-center rounded-[11px] border-none bg-accent px-5 text-sm font-semibold text-on-accent"
+          onClick={save}
+          disabled={saveVersion.isPending || !text.trim()}
+          className="flex h-10 cursor-pointer items-center rounded-[11px] border-none bg-accent px-5 text-sm font-semibold text-on-accent disabled:opacity-60"
         >
-          Salvar versão
+          {saveVersion.isPending ? "salvando…" : "Salvar versão"}
         </button>
       </header>
 
@@ -99,7 +127,7 @@ export default function EditLyricsPage() {
               <div className="flex items-center rounded-[11px] border border-border-active bg-surface-active px-[13px] py-[11px]">
                 <span className="font-mono text-[13px] text-ink">v{nextVersionNumber} · editando</span>
               </div>
-              {song.versions.map((version) => (
+              {versions.map((version) => (
                 <div
                   key={version.id}
                   className="flex items-center rounded-[11px] border border-border-alt bg-surface px-[13px] py-[11px]"
@@ -108,7 +136,9 @@ export default function EditLyricsPage() {
                   {version.isPrimary ? (
                     <span className="ml-auto font-mono text-[10px] text-accent-soft">principal</span>
                   ) : (
-                    <span className="ml-auto font-mono text-[11px] text-faint">{version.dateLabel}</span>
+                    <span className="ml-auto font-mono text-[11px] text-faint">
+                      {shortDate(version.createdAt)}
+                    </span>
                   )}
                 </div>
               ))}
@@ -117,7 +147,11 @@ export default function EditLyricsPage() {
 
           <div className="mt-auto flex items-center gap-[7px] font-mono text-xs text-success">
             <span className="h-[6px] w-[6px] rounded-full bg-success" />
-            salvo automaticamente · 14:32
+            {saveVersion.isError ? (
+              <span className="text-accent-soft">erro ao salvar — tente de novo</span>
+            ) : (
+              "salva ao confirmar a versão"
+            )}
           </div>
         </aside>
       </div>

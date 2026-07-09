@@ -4,7 +4,7 @@ import { Plus, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { songsSearchOptions } from "@monorepo/core/api";
 import { CoverArt, StatusDot } from "../components/primitives";
-import { songCover, songMeta, statusLabel } from "../lib/model";
+import { songCover, statusLabel } from "../lib/model";
 
 export default function SongsPage({ favoritesOnly = false }: { favoritesOnly?: boolean }) {
   const [query, setQuery] = useState("");

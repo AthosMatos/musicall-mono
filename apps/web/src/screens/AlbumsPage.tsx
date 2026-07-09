@@ -5,6 +5,7 @@ import {
   collectionsCreateOptions,
   collectionsSearchKey,
   collectionsSearchOptions,
+  CreateCollectionDto,
 } from "@monorepo/core/api";
 import { CoverArt } from "../components/primitives";
 import { collectionCover, collectionStatusLabel, collectionTypeLabel } from "../lib/model";
@@ -27,7 +28,7 @@ export default function AlbumsPage() {
   function newAlbum() {
     const title = window.prompt("Nome do álbum:");
     if (!title?.trim()) return;
-    createAlbum.mutate({ body: { type: "album", title: title.trim() } });
+    createAlbum.mutate({ body: { type: CreateCollectionDto.type.ALBUM, title: title.trim() } });
   }
 
   return (

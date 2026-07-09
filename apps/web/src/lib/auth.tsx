@@ -1,21 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import type { AuthTokens } from "@monorepo/core";
 import { authLogin, authLogout, authRegister, usersGetMe, type UserResponseDto } from "@monorepo/core/api";
 import { api, setAccessToken } from "./api";
+import { AuthContext, useAuth, type AuthStatus } from "./auth-context";
 import { queryClient } from "./query";
-
-type AuthStatus = "loading" | "signedOut" | "signedIn";
-
-interface AuthContextValue {
-  status: AuthStatus;
-  user: UserResponseDto | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
@@ -84,12 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
-  return ctx;
 }
 
 /** Route guard: renders children only when signed in. */

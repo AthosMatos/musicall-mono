@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
-import { mediaGetUrl, type MediaAssetResponseDto } from "@monorepo/core/api";
+import { mediaGetUrl } from "@monorepo/core/api";
 import { formatDuration, waveformSamples } from "../lib/model";
+
+/** Structural subset of MediaAssetResponseDto the player needs. */
+export interface PlayableAsset {
+  id: string;
+  label: string;
+  durationSec: number | null;
+}
 
 export function Waveform({
   samples,
@@ -49,7 +56,7 @@ export function Waveform({
  * Streams the asset through an HTMLAudioElement fed by a short-lived signed
  * URL from `GET /api/media/{id}/url` (ADR-0002 — bytes come from storage).
  */
-function useAudioPlayback(asset: MediaAssetResponseDto) {
+function useAudioPlayback(asset: PlayableAsset) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -146,7 +153,7 @@ export function PlayButton({
 }
 
 /** Side-panel player card (Song Detail web, frame 4). */
-export function PlayerCard({ asset }: { asset: MediaAssetResponseDto }) {
+export function PlayerCard({ asset }: { asset: PlayableAsset }) {
   const playback = useAudioPlayback(asset);
   const samples = waveformSamples(asset.id);
   return (

@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Music2 } from "lucide-react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { ApiError } from "@monorepo/core";
+import { ApiError } from "@monorepo/core/api";
 import { MonoLabel } from "../components/primitives";
-import { useAuth } from "../lib/auth";
+import { useAuth } from "../lib/auth-context";
 
 type Mode = "login" | "register";
 
@@ -54,7 +54,7 @@ export default function LoginPage() {
           <div className="flex h-[34px] w-[34px] items-center justify-center rounded-lg bg-accent text-on-accent">
             <Music2 size={18} strokeWidth={2.5} />
           </div>
-          <span className="text-xl font-semibold tracking-[-0.01em] text-ink">Songbook</span>
+          <span className="text-xl font-semibold tracking-[-0.01em] text-ink">MusicAll</span>
         </div>
 
         <h1 className="m-0 text-[28px] font-semibold tracking-[-0.02em] text-ink">

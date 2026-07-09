@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Disc3, Heart, Home, LogOut, Music2 } from "lucide-react";
 import { NavLink, Outlet, useParams } from "react-router-dom";
 import { collectionsSearchOptions } from "@monorepo/core/api";
-import { useAuth } from "../lib/auth";
+import { useAuth } from "../lib/auth-context";
 import { collectionTypeLabel } from "../lib/model";
 import { MonoLabel } from "./primitives";
 
@@ -34,7 +34,7 @@ export default function Shell() {
           <div className="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-accent font-mono font-bold text-on-accent">
             <Music2 size={16} strokeWidth={2.5} />
           </div>
-          <span className="text-lg font-semibold tracking-[-0.01em] text-ink">Songbook</span>
+          <span className="text-lg font-semibold tracking-[-0.01em] text-ink">MusicAll</span>
         </NavLink>
 
         <nav className="flex flex-col gap-[2px]">

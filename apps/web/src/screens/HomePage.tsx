@@ -3,7 +3,7 @@ import { ChevronRight, Play, Plus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { collectionsSearchOptions, songsSearchOptions } from "@monorepo/core/api";
 import { CoverArt, StatusDot } from "../components/primitives";
-import { useAuth } from "../lib/auth";
+import { useAuth } from "../lib/auth-context";
 import { collectionCover, collectionTypeLabel, songCover, songMeta, todayLabel } from "../lib/model";
 
 function SeeAll({ to }: { to: string }) {
