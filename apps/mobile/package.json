@@ -2,7 +2,7 @@
 	"name": "mobile",
 	"license": "0BSD",
 	"main": "expo-router/entry",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"author": "Athos Matos",
 	"description": "Musicall mobile app",
 	"keywords": [
@@ -34,6 +34,7 @@
 		"copy-apk": "mkdir -p apk && cp android/app/build/outputs/apk/release/*.apk apk/drdende-$(node -e \"console.log(require('./package.json').version)\").apk",
 		"gen-apk-release": "NODE_ENV=production node ./scripts/increment-version.js && cd android && NODE_ENV=production ./gradlew assembleRelease && cd .. && npm run copy-apk",
 		"eas-build": "eas build --platform all",
+		"eas-build-preview-android": "eas build --platform android --profile preview --non-interactive",
 		"eas-submit-android": "eas submit --platform android",
 		"eas-submit-ios": "eas submit --platform ios",
 		"eas-build-and-submit": "eas build --platform all --auto-submit",
