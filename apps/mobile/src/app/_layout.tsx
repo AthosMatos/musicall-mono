@@ -1,6 +1,6 @@
 import { jotaiStore } from "@/atoms/store";
-import { AppGradientView } from "@/components/ui/gradient-view";
 import { initQueryPersistence, QueryProvider } from "@/query-provider";
+import { colors } from "@/theme";
 import "@root/global.css";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -31,24 +31,22 @@ function RootNavigator() {
   }, []);
 
   return (
-    <AppGradientView start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 1 }} colors={['#D9D9D9', '#FFFFFF']}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: "slide_from_right",
-          contentStyle: {
-            backgroundColor: "transparent",
-          },
-        }}
-      >
-        <Stack.Protected guard={isLoggedIn}>
-          <Stack.Screen name="(protected)" />
-        </Stack.Protected>
-        <Stack.Protected guard={!isLoggedIn}>
-          <Stack.Screen name="(auth)" />
-        </Stack.Protected>
-      </Stack>
-    </AppGradientView>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "slide_from_right",
+        contentStyle: {
+          backgroundColor: colors.bg,
+        },
+      }}
+    >
+      <Stack.Protected guard={isLoggedIn}>
+        <Stack.Screen name="(protected)" />
+      </Stack.Protected>
+      <Stack.Protected guard={!isLoggedIn}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+    </Stack>
   );
 }
 

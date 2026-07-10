@@ -2,7 +2,7 @@
   "expo": {
     "name": "MusicAll",
     "slug": "MusicAll",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "MusicAll",
@@ -16,7 +16,7 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.athosladies.MusicAll",
-			"buildNumber": "1"
+			"buildNumber": "3"
     },
     "android": {
       "adaptiveIcon": {
@@ -27,21 +27,14 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.athosladies.MusicAll",
-			"versionCode": 1,
-      "edgeToEdgeEnabled": true
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png",
-      "bundler": "metro"
+			"versionCode": 3
     },
     "plugins": [
-      ["react-native-edge-to-edge", {}],
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FFF",
+          "backgroundColor": "#000",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 200

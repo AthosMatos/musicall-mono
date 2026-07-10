@@ -1,5 +1,5 @@
 import { usersGetMeAtom } from "@/api/atoms/users/mutations";
-import { setLogoutCallback } from "@/api/config";
+import { clearTokens, setLogoutCallback, setTokens } from "@/api/config";
 import { authTokenAtom } from "@/atoms/auth/token";
 import { userAtom } from "@/atoms/auth/user";
 import { LoginInput, RegisterInput, User } from "@monorepo/core";
@@ -39,16 +39,6 @@ interface AuthContextProps {
 }
 
 const AuthContext = createContext<AuthContextProps | null>(null);
-
-// Use this hook to access the user info.
-export function useAuth() {
-	const value = use(AuthContext);
-	if (!value) {
-		throw new Error("useAuth must be wrapped in a <AuthSessionProvider />");
-	}
-
-	return value;
-}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -104,6 +94,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 				// Sem credenciais armazenadas (mock): nada a autenticar.
 				if (!response) return;
 
+				setTokens(response)
 				const { accessToken } = response;
 				const user = await getMeAsync();
 				console.log("Login bem-sucedido:", accessToken, user);
@@ -130,7 +121,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 				// Sem credenciais armazenadas (mock): nada a autenticar.
 				if (!response) return;
-
+				setTokens(response)
 				const { accessToken } = response;
 				const user = await getMeAsync();
 				console.log("Registro bem-sucedido:", accessToken, user);
@@ -149,6 +140,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	const signOut = useCallback(async () => {
 		try {
 			setIsLoggedIn(false)
+			clearTokens()
 			// logoutAtom já cancela/limpa o queryClient e remove TODAS as chaves
 			// persistidas do usuário (token, user, address, credenciais, etc).
 			await logout();
@@ -219,4 +211,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			{children}
 		</AuthContext.Provider>
 	);
+}
+
+export function useAuth() {
+	const value = use(AuthContext);
+	if (!value) {
+		throw new Error("useAuth must be wrapped in a <AuthSessionProvider />");
+	}
+
+	return value;
 }

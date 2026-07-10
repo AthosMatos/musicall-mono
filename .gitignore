@@ -21,3 +21,4 @@ apps/api/tsdown.config.js.map
 apps/api/tsdown.config.js
 apps/api/tsdown.config.d.ts
 apps/api/tsconfig.build.tsbuildinfo
+pnpm-lock.yaml

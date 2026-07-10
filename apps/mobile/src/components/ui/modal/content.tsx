@@ -1,4 +1,4 @@
-import { appColors } from "@/theme/colors";
+import { colors } from "@/theme";
 import { ChevronLeft, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Dimensions, type DimensionValue, ScrollView, TouchableOpacity, View } from "react-native";
@@ -49,21 +49,40 @@ export const AppModalContent = (props: AppModalProps) => {
 
 	return (
 		<Reanimated.View
-			className="bg-white mx-4 rounded-3xl absolute left-0 right-0 overflow-hidden"
-			style={[containerAnimatedStyle, { marginBottom: insets.bottom + 10, maxHeight: height }]}
+			className="mx-4 rounded-3xl absolute left-0 right-0 overflow-hidden border"
+			style={[
+				containerAnimatedStyle,
+				{
+					marginBottom: insets.bottom + 10,
+					maxHeight: height,
+					backgroundColor: colors.bg,
+					borderColor: colors.accentSoft,
+					// inner accent glow — mirrors the bottom tabs inset shadow
+					boxShadow: [
+						{
+							offsetX: 0,
+							offsetY: 0,
+							blurRadius: 24,
+							spreadDistance: 0,
+							color: "rgba(242, 88, 49, 0.415)",
+							inset: true,
+						},
+					],
+				},
+			]}
 		>
 			<View
 				className="absolute top-0 z-10 w-full"
-				style={{ backgroundColor: "rgba(255, 255, 255, 0.9)" }}
+				style={{ backgroundColor: "rgba(23, 20, 15, 0.92)" }}
 				onLayout={(e) => setHeaderContainerHeight(e.nativeEvent.layout.height)}
 			>
 				{(title || rightComponent || icon) && (
 					<View className="flex-row items-center justify-between px-4 py-4">
-						<ChevronLeft opacity={0} size={28} color={appColors.neutral.dark} onPress={onClose} />
+						<ChevronLeft opacity={0} size={28} color={colors.ink2} onPress={onClose} />
 						{title && (
 							<AppText
 								className="shrink text-center text-lg font-bold"
-								style={{ color: appColors.neutral.dark }}
+								style={{ color: colors.ink }}
 							>
 								{title}
 							</AppText>
@@ -73,7 +92,7 @@ export const AppModalContent = (props: AppModalProps) => {
 							className="p-2"
 							hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 						>
-							<X size={28} color={appColors.neutral.dark} />
+							<X size={28} color={colors.ink2} />
 						</TouchableOpacity>
 					</View>
 				)}
@@ -81,7 +100,7 @@ export const AppModalContent = (props: AppModalProps) => {
 					<AppText
 						style={{
 							paddingHorizontal: padChildren ? 24 : undefined,
-							color: appColors.neutral.dark,
+							color: colors.ink2,
 						}}
 					>
 						{subtitle}

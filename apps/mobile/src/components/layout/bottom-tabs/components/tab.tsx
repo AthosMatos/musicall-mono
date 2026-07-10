@@ -1,16 +1,16 @@
 
-import { appColors } from "@/theme/colors";
+import { colors } from "@/theme";
 import { router } from "expo-router";
 import { TouchableOpacity } from "react-native";
 import type { TabProps } from "../types";
 
 const tabColors = {
-	textSelected: appColors.primary,
-	textUnselected: "#000000",
+	textSelected: colors.highlight,
+	textUnselected: "#ffffff",
 };
 
 export const Tab = (props: TabProps) => {
-	const { path, icon, selected, isPrimary, onPress, allowIcognito } = props;
+	const { path, icon, selected, onPress } = props;
 
 	const handlePress = () => {
 		onPress?.();
@@ -29,10 +29,10 @@ export const Tab = (props: TabProps) => {
 				else { handleIsIcognito(() => handlePress()) } */
 
 				handlePress()
-			}}
-			className={`items-center justify-center rounded-xl p-4 ${selected ? 'bg-primary/15 ' : ''}`}
+			}}/* ${selected ? 'bg-primary/15 ' : ''} */
+			className={`items-center justify-center rounded-xl p-4 `}
 		>
-			{icon({ color: selected ? tabColors.textSelected : tabColors.textUnselected })}
+			{icon({ color: selected ? tabColors.textSelected : tabColors.textUnselected, selected })}
 		</TouchableOpacity>
 	);
 };

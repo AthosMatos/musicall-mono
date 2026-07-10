@@ -2,9 +2,7 @@ import type { Href } from "expo-router";
 
 export interface TabType {
 	path: Href;
-	icon: ({ color }: { color: string }) => React.JSX.Element;
-	isPrimary?: boolean;
-	allowIcognito?: boolean;
+	icon: ({ color, selected }: { color: string, selected?: boolean }) => React.JSX.Element;
 }
 
 export interface TabProps extends TabType {

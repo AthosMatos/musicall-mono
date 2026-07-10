@@ -110,7 +110,7 @@ export default function SongsScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
+  screen: { flex: 1, },
   count: { fontFamily: fonts.mono, fontSize: 13, color: colors.meta },
   title: {
     fontFamily: fonts.uiSemiBold,

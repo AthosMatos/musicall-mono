@@ -1,14 +1,24 @@
 import { MonoLabel, Waveform, formatTime } from "@/components/ui/ui";
+import { uploadAudioToSong } from "@/hooks/useMediaUpload";
 import { colors, fonts } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { CreateSongDto, lyricsCreate, songsCreateOptions } from "@monorepo/core/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CreateSongDto, lyricsCreate, songsCreate, songsListKey } from "@monorepo/core/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { Audio } from "expo-av";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const IDLE_SAMPLES = [30, 60, 90, 100, 70, 45, 80, 55, 35, 65];
+
+function mimeFromUri(uri: string): string {
+  const ext = uri.split(".").pop()?.toLowerCase();
+  if (ext === "caf") return "audio/x-caf";
+  if (ext === "wav") return "audio/wav";
+  if (ext === "3gp") return "audio/3gpp";
+  return "audio/m4a";
+}
 
 export default function CaptureScreen() {
   const queryClient = useQueryClient();
@@ -17,7 +27,11 @@ export default function CaptureScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [samples, setSamples] = useState<number[]>(IDLE_SAMPLES);
+  const [recordedUri, setRecordedUri] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordingRef = useRef<Audio.Recording | null>(null);
 
   useEffect(() => {
     if (!isRecording) return;
@@ -30,11 +44,68 @@ export default function CaptureScreen() {
     };
   }, [isRecording]);
 
-  const hasTake = elapsed > 0;
+  // Release the mic if we unmount mid-take.
+  useEffect(() => {
+    return () => {
+      void recordingRef.current?.stopAndUnloadAsync().catch(() => undefined);
+    };
+  }, []);
 
-  const saveDraft = useMutation({
-    ...songsCreateOptions(),
-    onSuccess: async (song) => {
+  const hasTake = recordedUri != null;
+
+  async function startRecording() {
+    setError(null);
+    try {
+      const perm = await Audio.requestPermissionsAsync();
+      if (!perm.granted) {
+        setError("permissão de microfone negada");
+        return;
+      }
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      recordingRef.current = recording;
+      setRecordedUri(null);
+      setElapsed(0);
+      setSamples(IDLE_SAMPLES);
+      setIsRecording(true);
+    } catch {
+      setError("não foi possível iniciar a gravação");
+    }
+  }
+
+  async function stopRecording(): Promise<string | null> {
+    const recording = recordingRef.current;
+    if (!recording) return null;
+    setIsRecording(false);
+    try {
+      await recording.stopAndUnloadAsync();
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+    } catch {
+      // fall through — we still try to read the URI below
+    }
+    const uri = recording.getURI() ?? null;
+    recordingRef.current = null;
+    setRecordedUri(uri);
+    return uri;
+  }
+
+  function toggleRecording() {
+    if (isRecording) void stopRecording();
+    else void startRecording();
+  }
+
+  async function save() {
+    if (isSaving) return;
+    setIsSaving(true);
+    setError(null);
+    try {
+      const uri = isRecording ? await stopRecording() : recordedUri;
+      const song = await songsCreate({
+        title: title.trim() || "ideia sem nome",
+        status: CreateSongDto.status.DRAFT,
+      });
       if (snippet.trim()) {
         try {
           await lyricsCreate(song.id, { label: "v1", content: snippet, isPrimary: true });
@@ -42,20 +113,20 @@ export default function CaptureScreen() {
           // the draft song exists; the snippet can be re-added in the editor
         }
       }
-      await queryClient.invalidateQueries({ queryKey: ["songs-list"] });
+      if (uri) {
+        await uploadAudioToSong(song.id, {
+          uri,
+          name: title.trim() || "gravação",
+          mime: mimeFromUri(uri),
+        });
+      }
+      await queryClient.invalidateQueries({ queryKey: songsListKey() });
       router.back();
-    },
-  });
-
-  function save() {
-    if (saveDraft.isPending) return;
-    setIsRecording(false);
-    saveDraft.mutate({
-      body: {
-        title: title.trim() || "ideia sem nome",
-        status: CreateSongDto.status.DRAFT,
-      },
-    });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "erro ao salvar");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -84,7 +155,7 @@ export default function CaptureScreen() {
 
       {/* record */}
       <View style={styles.recordArea}>
-        <Pressable onPress={() => setIsRecording((r) => !r)} style={styles.recordOuter}>
+        <Pressable onPress={toggleRecording} style={styles.recordOuter} disabled={isSaving}>
           <View style={styles.recordHalo} />
           <View style={styles.recordButton}>
             {isRecording ? (
@@ -99,8 +170,13 @@ export default function CaptureScreen() {
           <Waveform samples={samples} progress={isRecording ? 0.4 : 0} height={34} />
         </View>
         <Text style={styles.recordStatus}>
-          {isRecording ? "gravando ideia…" : hasTake ? "gravação pausada" : "toque para gravar"}
+          {isRecording ? "gravando ideia…" : hasTake ? "gravação pronta" : "toque para gravar"}
         </Text>
+        {error && (
+          <Text style={{ fontFamily: fonts.mono, fontSize: 12, color: colors.accentSoft }}>
+            {error}
+          </Text>
+        )}
       </View>
 
       {/* lyric snippet */}
@@ -124,12 +200,12 @@ export default function CaptureScreen() {
           <Text style={{ fontFamily: fonts.ui, fontSize: 15, color: colors.ink2 }}>Descartar</Text>
         </Pressable>
         <Pressable
-          style={[styles.save, saveDraft.isPending && { opacity: 0.6 }]}
-          onPress={save}
-          disabled={saveDraft.isPending}
+          style={[styles.save, isSaving && { opacity: 0.6 }]}
+          onPress={() => void save()}
+          disabled={isSaving}
         >
           <Text style={{ fontFamily: fonts.uiSemiBold, fontSize: 15, color: colors.onAccent }}>
-            {saveDraft.isPending ? "salvando…" : "Salvar rascunho"}
+            {isSaving ? "salvando…" : "Salvar rascunho"}
           </Text>
         </Pressable>
       </View>

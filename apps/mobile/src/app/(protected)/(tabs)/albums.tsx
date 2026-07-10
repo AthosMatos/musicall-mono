@@ -118,7 +118,7 @@ export default function AlbumsScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
+  screen: { flex: 1, },
   header: {
     paddingHorizontal: 24,
     paddingTop: 18,

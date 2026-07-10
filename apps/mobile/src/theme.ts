@@ -26,7 +26,9 @@ export const colors = {
   faint: "#6b655c",
   faint2: "#5b554d",
 
+  highlight: "#ee5b36",
   accent: "#c25e44",
+  accentDeep: "#5e2a1f",
   accentSoft: "#e08a72",
   onAccent: "#1a120e",
   amber: "#cf9b3f",

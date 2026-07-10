@@ -1,5 +1,7 @@
+import AppDropDown from "@/components/ui/dropDown";
 import { CoverArt, formatTime, MetaChip, PlayButton, StatusPill, Waveform } from "@/components/ui/ui";
 import { useAudioPlayback } from "@/hooks/useAudioPlayback";
+import { useMediaUpload } from "@/hooks/useMediaUpload";
 import { formatDuration, statusLabel, waveformSamples } from "@/lib/model";
 import { colors, fonts } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,7 +18,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const tabs = ["Letra", "Cifra", "Tab", "Áudios", "Imagens"] as const;
@@ -90,7 +92,6 @@ export default function SongDetailScreen() {
   const { id = "" } = useLocalSearchParams<{ id: string }>();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("Letra");
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const songQuery = useQuery({ ...songsGetOptions(id), enabled: !!id });
   const lyricsQuery = useQuery({ ...lyricsListOptions(id), enabled: !!id });
@@ -102,6 +103,8 @@ export default function SongDetailScreen() {
     ...lyricsRemoveOptions(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: lyricsListKey(id) }),
   });
+
+  const upload = useMediaUpload(id);
 
   const song = songQuery.data;
   const versions = lyricsQuery.data ?? [];
@@ -137,66 +140,54 @@ export default function SongDetailScreen() {
           <View style={styles.savedDot} />
           <Text style={styles.savedText}>salvo</Text>
         </View>
-        <Pressable hitSlop={10} onPress={() => setMenuOpen(true)}>
-          <Ionicons name="ellipsis-vertical" size={19} color={colors.ink2} />
-        </Pressable>
-      </View>
-
-      {/* more menu */}
-      <Modal
-        visible={menuOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setMenuOpen(false)}
-      >
-        <Pressable style={styles.menuOverlay} onPress={() => setMenuOpen(false)}>
-          <View style={styles.menu}>
-            <Pressable
-              style={styles.menuItem}
-              onPress={() => {
-                setMenuOpen(false);
+        <AppDropDown
+          anchorSide="right"
+          data={[
+            {
+              label: "Editar letra",
+              icon: <Ionicons name="pencil" size={16} color={colors.ink3} />,
+              onPress: () =>
                 router.push(
                   primary
                     ? `/song/${song.id}/edit?version=${primary.id}`
                     : `/song/${song.id}/edit?new=1`
-                );
-              }}
-            >
-              <Ionicons name="pencil" size={17} color={colors.ink3} />
-              <Text style={styles.menuText}>Editar letra</Text>
-            </Pressable>
-            <Pressable
-              style={styles.menuItem}
-              onPress={() => {
-                setMenuOpen(false);
-                router.push(`/song/${song.id}/edit?new=1`);
-              }}
-            >
-              <Ionicons name="add" size={17} color={colors.ink3} />
-              <Text style={styles.menuText}>Nova versão</Text>
-            </Pressable>
-            <Pressable
-              disabled={!primary}
-              style={[styles.menuItem, !primary && { opacity: 0.4 }]}
-              onPress={() => {
-                if (!primary) return;
-                setMenuOpen(false);
-                Alert.alert("Excluir letra", `Excluir a versão "${primary.label}" da letra?`, [
-                  { text: "Cancelar", style: "cancel" },
+                ),
+            },
+            {
+              label: "Nova versão",
+              icon: <Ionicons name="add" size={16} color={colors.ink3} />,
+              onPress: () => router.push(`/song/${song.id}/edit?new=1`),
+            },
+            ...(primary
+              ? [
                   {
-                    text: "Excluir",
-                    style: "destructive",
-                    onPress: () => removeLyric.mutate({ songId: song.id, id: primary.id }),
+                    label: "Excluir letra",
+                    icon: <Ionicons name="trash-outline" size={16} color={colors.accentSoft} />,
+                    textColor: colors.accentSoft,
+                    onPress: () =>
+                      Alert.alert(
+                        "Excluir letra",
+                        `Excluir a versão "${primary.label}" da letra?`,
+                        [
+                          { text: "Cancelar", style: "cancel" },
+                          {
+                            text: "Excluir",
+                            style: "destructive",
+                            onPress: () =>
+                              removeLyric.mutate({ songId: song.id, id: primary.id }),
+                          },
+                        ]
+                      ),
                   },
-                ]);
-              }}
-            >
-              <Ionicons name="trash-outline" size={17} color={colors.accentSoft} />
-              <Text style={[styles.menuText, { color: colors.accentSoft }]}>Excluir letra</Text>
-            </Pressable>
+                ]
+              : []),
+          ]}
+        >
+          <View hitSlop={10}>
+            <Ionicons name="ellipsis-vertical" size={19} color={colors.ink2} />
           </View>
-        </Pressable>
-      </Modal>
+        </AppDropDown>
+      </View>
 
       {/* title block */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
@@ -263,39 +254,61 @@ export default function SongDetailScreen() {
           ) : (
             <EmptyState label="sem tablatura ainda" action="adicionar tab" />
           ))}
-        {activeTab === "Áudios" &&
-          (audios.length > 0 ? (
-            <View style={{ gap: 8 }}>
-              {audios.map((asset) => (
-                <View key={asset.id} style={styles.audioRow}>
-                  <CoverArt variant="none" style={styles.audioThumb}>
-                    <Ionicons name="mic-outline" size={16} color={colors.faint} />
-                  </CoverArt>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontFamily: fonts.mono, fontSize: 13, color: colors.ink2 }}>
-                      {asset.label}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: fonts.mono,
-                        fontSize: 11,
-                        color: colors.meta2,
-                        marginTop: 2,
-                      }}
-                    >
-                      {formatDuration(asset.durationSec) ?? "—"}
-                    </Text>
+        {activeTab === "Áudios" && (
+          <View style={{ gap: 14 }}>
+            {audios.length > 0 ? (
+              <View style={{ gap: 8 }}>
+                {audios.map((asset) => (
+                  <View key={asset.id} style={styles.audioRow}>
+                    <CoverArt variant="none" style={styles.audioThumb}>
+                      <Ionicons name="mic-outline" size={16} color={colors.faint} />
+                    </CoverArt>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: fonts.mono, fontSize: 13, color: colors.ink2 }}>
+                        {asset.label}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: fonts.mono,
+                          fontSize: 11,
+                          color: colors.meta2,
+                          marginTop: 2,
+                        }}
+                      >
+                        {formatDuration(asset.durationSec) ?? "—"}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              ))}
+                ))}
+              </View>
+            ) : (
+              <Text style={{ fontFamily: fonts.mono, fontSize: 13, color: colors.faint }}>
+                sem áudios ainda
+              </Text>
+            )}
+            <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+              <Pressable style={styles.audioAction} onPress={() => router.push("/capture")}>
+                <Ionicons name="mic-outline" size={15} color={colors.ink3} />
+                <Text style={styles.audioActionText}>gravar ideia</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.audioAction, upload.isUploading && { opacity: 0.6 }]}
+                onPress={() => void upload.pickAndUpload()}
+                disabled={upload.isUploading}
+              >
+                <Ionicons name="cloud-upload-outline" size={15} color={colors.ink3} />
+                <Text style={styles.audioActionText}>
+                  {upload.isUploading ? "enviando…" : "enviar do dispositivo"}
+                </Text>
+              </Pressable>
             </View>
-          ) : (
-            <EmptyState
-              label="sem áudios ainda"
-              action="gravar ideia"
-              onPress={() => router.push("/capture")}
-            />
-          ))}
+            {upload.error && (
+              <Text style={{ fontFamily: fonts.mono, fontSize: 12, color: colors.accentSoft }}>
+                {upload.error}
+              </Text>
+            )}
+          </View>
+        )}
         {activeTab === "Imagens" && (
           <EmptyState label="sem imagens ainda" action="adicionar imagem" />
         )}
@@ -320,30 +333,6 @@ const styles = StyleSheet.create({
   savedRow: { flexDirection: "row", alignItems: "center", gap: 7 },
   savedDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success },
   savedText: { fontFamily: fonts.mono, fontSize: 12, color: colors.success },
-  menuOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    paddingTop: 54,
-    paddingRight: 18,
-    alignItems: "flex-end",
-  },
-  menu: {
-    minWidth: 200,
-    backgroundColor: colors.bg,
-    borderWidth: 1,
-    borderColor: colors.borderAlt,
-    borderRadius: 14,
-    paddingVertical: 4,
-    overflow: "hidden",
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  menuText: { fontFamily: fonts.ui, fontSize: 15, color: colors.ink3 },
   title: { fontFamily: fonts.uiSemiBold, fontSize: 28, color: colors.ink, letterSpacing: -0.56 },
   tabRow: {
     flexDirection: "row",
@@ -382,6 +371,18 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   audioThumb: { width: 42, height: 42, borderRadius: 9 },
+  audioAction: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    borderRadius: 9,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+  },
+  audioActionText: { fontFamily: fonts.mono, fontSize: 12, color: colors.ink3 },
   player: {
     marginHorizontal: 16,
     marginBottom: 14,

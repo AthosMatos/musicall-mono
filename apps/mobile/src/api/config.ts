@@ -29,7 +29,6 @@ function resolveApiBaseUrl(): string {
   // e.g. "192.168.0.12:8081" — the machine running Metro.
   const hostUri =
     Constants.expoConfig?.hostUri ??
-    // @ts-expect-error debuggerHost exists on the classic manifest shape
     (Constants.manifest?.debuggerHost as string | undefined);
   const host = hostUri?.split(":")[0];
   if (host && host !== "localhost" && host !== "127.0.0.1") {

@@ -1,28 +1,50 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, Plus } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { ChevronLeft, MoreVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   collectionsAddSongOptions,
   collectionsGetOptions,
   collectionsListSongsKey,
   collectionsListSongsOptions,
+  collectionsRemoveOptions,
   collectionsReorderOptions,
+  collectionsSearchKey,
+  collectionsUpdateOptions,
 } from "@monorepo/core/api";
-import { CoverArt, MonoLabel } from "../components/primitives";
+import { MonoLabel } from "../components/primitives";
+import { CollectionCover } from "../components/CollectionCover";
 import { ReorderableTrackList } from "../components/TrackList";
-import { collectionCover, collectionStatusLabel, collectionTypeLabel } from "../lib/model";
+import { collectionStatusLabel, collectionTypeLabel } from "../lib/model";
+import { uploadCollectionCover } from "../lib/media";
 import { AddTrackDialog } from "../components/AddTrackDialog";
+import { EditCollectionDialog } from "../components/EditCollectionDialog";
 
 export default function AlbumDetailPage() {
   const { id = "" } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const albumQuery = useQuery({ ...collectionsGetOptions(id), enabled: !!id });
   const tracksQuery = useQuery({ ...collectionsListSongsOptions(id), enabled: !!id });
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    window.addEventListener("mousedown", onDown);
+    return () => window.removeEventListener("mousedown", onDown);
+  }, [menuOpen]);
+
   const invalidateTracks = () =>
     queryClient.invalidateQueries({ queryKey: collectionsListSongsKey(id) });
+
+  const invalidateCollections = () =>
+    queryClient.invalidateQueries({ queryKey: collectionsSearchKey().slice(0, 1) });
 
   const reorder = useMutation({
     ...collectionsReorderOptions(),
@@ -33,6 +55,52 @@ export default function AlbumDetailPage() {
     ...collectionsAddSongOptions(),
     onSuccess: invalidateTracks,
   });
+
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  const updateAlbum = useMutation({
+    ...collectionsUpdateOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: collectionsGetOptions(id).queryKey });
+      invalidateCollections();
+      setEditOpen(false);
+    },
+  });
+
+  // Cover upload (presign → PUT → confirm) runs before the collection update so
+  // the new coverMediaId is persisted in the same save action.
+  async function handleEditSave(title: string, description: string, coverFile: File | null) {
+    setIsSavingEdit(true);
+    try {
+      const coverMediaId = coverFile ? await uploadCollectionCover(id, coverFile) : undefined;
+      await updateAlbum.mutateAsync({
+        id,
+        body: {
+          title,
+          description: description || undefined,
+          ...(coverMediaId ? { coverMediaId } : {}),
+        },
+      });
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : "erro ao salvar a coleção");
+    } finally {
+      setIsSavingEdit(false);
+    }
+  }
+
+  const removeAlbum = useMutation({
+    ...collectionsRemoveOptions(),
+    onSuccess: () => {
+      invalidateCollections();
+      navigate("/albums");
+    },
+  });
+
+  const confirmDelete = () => {
+    if (!window.confirm("Excluir esta coleção? As faixas não serão apagadas.")) return;
+    setMenuOpen(false);
+    removeAlbum.mutate({ id });
+  };
 
   const album = albumQuery.data;
   const tracks = tracksQuery.data ?? [];
@@ -48,13 +116,49 @@ export default function AlbumDetailPage() {
     <div className="flex min-h-0 flex-1">
       {/* album header column */}
       <div className="flex w-[340px] shrink-0 flex-col overflow-y-auto border-r border-border px-[30px] py-9">
-        <Link
-          to="/albums"
-          className="mb-[18px] flex items-center gap-1 text-xl text-[#7a7268] no-underline hover:text-ink-2"
-        >
-          <ChevronLeft size={20} /> Álbuns
-        </Link>
-        <CoverArt variant={collectionCover(album)} className="aspect-square w-full rounded-2xl" />
+        <div className="mb-[18px] flex items-center justify-between">
+          <Link
+            to="/albums"
+            className="flex items-center gap-1 text-xl text-[#7a7268] no-underline hover:text-ink-2"
+          >
+            <ChevronLeft size={20} /> Álbuns
+          </Link>
+          <div ref={menuRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Mais opções"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              className="flex cursor-pointer border-none bg-transparent p-0 text-[#7a7268] hover:text-ink-2"
+            >
+              <MoreVertical size={20} />
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 top-[calc(100%+8px)] z-20 w-[180px] overflow-hidden rounded-xl border border-border-alt bg-bg py-1 shadow-drag">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setEditOpen(true);
+                  }}
+                  className="flex w-full cursor-pointer items-center gap-[10px] border-none bg-transparent px-4 py-[10px] text-left text-sm text-ink-3 hover:bg-surface-active hover:text-ink"
+                >
+                  <Pencil size={15} /> Editar
+                </button>
+                <button
+                  type="button"
+                  disabled={removeAlbum.isPending}
+                  onClick={confirmDelete}
+                  className="flex w-full cursor-pointer items-center gap-[10px] border-none bg-transparent px-4 py-[10px] text-left text-sm text-accent-soft hover:bg-surface-active disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Trash2 size={15} /> Excluir
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        <CollectionCover collection={album} className="aspect-square w-full rounded-2xl" />
         <div className="mt-5 font-mono text-[11px] tracking-[0.08em] text-amber uppercase">
           {collectionTypeLabel(album)} · {collectionStatusLabel[album.status]}
         </div>
@@ -103,6 +207,17 @@ export default function AlbumDetailPage() {
               { onSuccess: () => setAddOpen(false) },
             )
           }
+        />
+      )}
+
+      {editOpen && (
+        <EditCollectionDialog
+          collection={album}
+          title={album.title}
+          description={album.description ?? ""}
+          isSaving={isSavingEdit}
+          onClose={() => setEditOpen(false)}
+          onSave={handleEditSave}
         />
       )}
     </div>

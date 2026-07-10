@@ -1,3 +1,6 @@
+import AppDropDown from "@/components/ui/dropDown";
+import AppModal from "@/components/ui/modal";
+import { AppText } from "@/components/ui/text";
 import { CoverArt, MonoLabel, StatusDot } from "@/components/ui/ui";
 import {
   collectionCover,
@@ -13,7 +16,9 @@ import {
   collectionsGetOptions,
   collectionsListSongsKey,
   collectionsListSongsOptions,
+  collectionsRemoveOptions,
   collectionsReorderOptions,
+  collectionsUpdateOptions,
   type SongResponseDto,
   songsSearchOptions,
 } from "@monorepo/core/api";
@@ -21,13 +26,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Modal,
+  Alert,
   PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -111,6 +117,7 @@ export default function AlbumDetailScreen() {
   const [dragIndex, setDragIndex] = useState(-1);
   const [dragOffset, setDragOffset] = useState(0);
   const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const drag = useRef({ start: -1, current: -1, rowHeight: 64 + ROW_GAP });
 
   const serverTracks = tracksQuery.data;
@@ -130,6 +137,34 @@ export default function AlbumDetailScreen() {
     ...collectionsAddSongOptions(),
     onSuccess: invalidateTracks,
   });
+
+  const updateAlbum = useMutation({
+    ...collectionsUpdateOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: collectionsGetOptions(id).queryKey });
+      queryClient.invalidateQueries({ queryKey: ["collections-list"] });
+      setEditOpen(false);
+    },
+  });
+
+  const removeAlbum = useMutation({
+    ...collectionsRemoveOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["collections-list"] });
+      router.back();
+    },
+  });
+
+  function confirmDelete() {
+    Alert.alert(
+      "Excluir coleção",
+      "Tem certeza que deseja excluir esta coleção? As faixas não serão apagadas.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Excluir", style: "destructive", onPress: () => removeAlbum.mutate({ id }) },
+      ]
+    );
+  }
 
   const album = albumQuery.data;
 
@@ -185,9 +220,26 @@ export default function AlbumDetailScreen() {
         <Pressable onPress={() => router.back()} hitSlop={10}>
           <Ionicons name="chevron-back" size={24} color={colors.ink2} />
         </Pressable>
-        <Pressable hitSlop={10}>
-          <Ionicons name="ellipsis-vertical" size={19} color={colors.ink2} />
-        </Pressable>
+        <AppDropDown
+          anchorSide="right"
+          data={[
+            {
+              label: "Editar",
+              icon: <Ionicons name="pencil" size={16} color={colors.ink2} />,
+              onPress: () => setEditOpen(true),
+            },
+            {
+              label: "Excluir",
+              icon: <Ionicons name="trash-outline" size={16} color={colors.highlight} />,
+              textColor: colors.highlight,
+              onPress: confirmDelete,
+            },
+          ]}
+        >
+          <View hitSlop={10}>
+            <Ionicons name="ellipsis-vertical" size={19} color={colors.ink2} />
+          </View>
+        </AppDropDown>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 14 }} scrollEnabled={dragIndex === -1}>
@@ -253,7 +305,106 @@ export default function AlbumDetailScreen() {
           addSong.mutate({ id, body: { songId } }, { onSuccess: () => setAddOpen(false) })
         }
       />
+
+      <EditAlbumModal
+        visible={editOpen}
+        title={album.title}
+        description={album.description ?? ""}
+        isSaving={updateAlbum.isPending}
+        onClose={() => setEditOpen(false)}
+        onSave={(title, description) =>
+          updateAlbum.mutate({ id, body: { title, description: description || undefined } })
+        }
+      />
     </SafeAreaView>
+  );
+}
+
+/** Modal to edit the collection's title and description. */
+function EditAlbumModal({
+  visible,
+  title,
+  description,
+  isSaving,
+  onSave,
+  onClose,
+}: {
+  visible: boolean;
+  title: string;
+  description: string;
+  isSaving: boolean;
+  onSave: (title: string, description: string) => void;
+  onClose: () => void;
+}) {
+  const [draftTitle, setDraftTitle] = useState(title);
+  const [draftDescription, setDraftDescription] = useState(description);
+
+  // reset the draft whenever the modal (re)opens so it reflects the current album
+  useEffect(() => {
+    if (visible) {
+      setDraftTitle(title);
+      setDraftDescription(description);
+    }
+  }, [visible, title, description]);
+
+  const canSave = draftTitle.trim().length > 0 && !isSaving;
+
+  return (
+    <AppModal
+      visible={visible}
+      onClose={onClose}
+      title="Editar coleção"
+      useScrollView={false}
+      padChildren
+      footer={
+        <TouchableOpacity
+          activeOpacity={0.85}
+          disabled={!canSave}
+          onPress={() => onSave(draftTitle.trim(), draftDescription.trim())}
+          className="h-12 rounded-xl flex-row items-center justify-center"
+          style={{ backgroundColor: colors.accent, opacity: canSave ? 1 : 0.5 }}
+        >
+          <AppText className="text-[15px] font-semibold" style={{ color: colors.onAccent }}>
+            {isSaving ? "Salvando…" : "Salvar"}
+          </AppText>
+        </TouchableOpacity>
+      }
+    >
+      <View className="gap-1">
+        <AppText className="text-sm font-semibold" style={{ color: colors.ink2 }}>
+          Título
+        </AppText>
+        <TextInput
+          value={draftTitle}
+          onChangeText={setDraftTitle}
+          placeholder="Título da coleção"
+          placeholderTextColor={colors.faint}
+          selectionColor={colors.accent}
+          className="h-[50px] border rounded-lg px-4 text-sm"
+          style={{ color: colors.ink, backgroundColor: colors.surfaceAlt, borderColor: colors.borderStrong }}
+        />
+
+        <AppText className="text-sm font-semibold mt-4" style={{ color: colors.ink2 }}>
+          Descrição
+        </AppText>
+        <TextInput
+          value={draftDescription}
+          onChangeText={setDraftDescription}
+          placeholder="Descrição (opcional)"
+          placeholderTextColor={colors.faint}
+          selectionColor={colors.accent}
+          multiline
+          className="border rounded-lg px-4 py-3 text-sm"
+          style={{
+            color: colors.ink,
+            backgroundColor: colors.surfaceAlt,
+            borderColor: colors.borderStrong,
+            minHeight: 80,
+            textAlignVertical: "top",
+          }}
+        />
+      </View>
+    </AppModal>
   );
 }
 
@@ -281,63 +432,77 @@ function AddTrackModal({
   const candidates = (songsQuery.data?.items ?? []).filter((s) => !existing.has(s.id));
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.sheetOverlay}>
-        <View style={styles.sheet}>
-          <View style={styles.sheetHeader}>
-            <Text style={styles.sheetTitle}>Adicionar faixa</Text>
-            <Pressable onPress={onClose} hitSlop={10}>
-              <Ionicons name="close" size={22} color={colors.ink2} />
-            </Pressable>
-          </View>
-
-          <View style={styles.sheetSearch}>
-            <Ionicons name="search" size={15} color={colors.faint} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Buscar músicas…"
-              placeholderTextColor={colors.faint}
-              selectionColor={colors.accent}
-              style={styles.sheetSearchInput}
-            />
-          </View>
-
-          <ScrollView contentContainerStyle={{ paddingBottom: 24, gap: 8 }}>
-            {songsQuery.isLoading && <Text style={styles.sheetEmpty}>carregando…</Text>}
-            {!songsQuery.isLoading && candidates.length === 0 && (
-              <Text style={styles.sheetEmpty}>
-                {q ? "nenhuma música encontrada" : "todas as músicas já estão nesta coleção"}
-              </Text>
-            )}
-            {candidates.map((song) => {
-              const untitled = song.status === "draft" && !song.key;
-              return (
-                <Pressable
-                  key={song.id}
-                  disabled={isAdding}
-                  onPress={() => onAdd(song.id)}
-                  style={[styles.candidateRow, isAdding && { opacity: 0.5 }]}
-                >
-                  <StatusDot status={song.status} />
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text
-                      style={[styles.trackTitle, untitled && { color: colors.ink2 }]}
-                      numberOfLines={1}
-                    >
-                      {song.title}
-                    </Text>
-                  </View>
-                  <Text style={styles.trackMeta}>
-                    {song.key ? songMeta(song) : statusLabel[song.status]}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+    <AppModal
+      visible={visible}
+      onClose={onClose}
+      title="Adicionar faixa"
+      useScrollView={false}
+      header={
+        <View style={[styles.sheetSearch, { marginHorizontal: 20 }]}>
+          <Ionicons name="search" size={15} color={colors.faint} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Buscar músicas…"
+            placeholderTextColor={colors.faint}
+            selectionColor={colors.accent}
+            style={styles.sheetSearchInput}
+          />
         </View>
-      </View>
-    </Modal>
+      }
+      footer={
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => {
+            onClose();
+            router.push("/capture");
+          }}
+          className="h-12 flex-row items-center justify-center gap-2 rounded-xl border"
+          style={{ borderColor: colors.borderStrong, backgroundColor: colors.surfaceAlt }}
+        >
+          <Ionicons name="add" size={18} color={colors.accent} />
+          <AppText className="text-[15px] font-semibold" style={{ color: colors.ink }}>
+            Criar nova música
+          </AppText>
+        </TouchableOpacity>
+      }
+    >
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: 8 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {songsQuery.isLoading && <Text style={styles.sheetEmpty}>carregando…</Text>}
+        {!songsQuery.isLoading && candidates.length === 0 && (
+          <Text style={styles.sheetEmpty}>
+            {q ? "nenhuma música encontrada" : "todas as músicas já estão nesta coleção"}
+          </Text>
+        )}
+        {candidates.map((song) => {
+          const untitled = song.status === "draft" && !song.key;
+          return (
+            <Pressable
+              key={song.id}
+              disabled={isAdding}
+              onPress={() => onAdd(song.id)}
+              style={[styles.candidateRow, isAdding && { opacity: 0.5 }]}
+            >
+              <StatusDot status={song.status} />
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text
+                  style={[styles.trackTitle, untitled && { color: colors.ink2 }]}
+                  numberOfLines={1}
+                >
+                  {song.title}
+                </Text>
+              </View>
+              <Text style={styles.trackMeta}>
+                {song.key ? songMeta(song) : statusLabel[song.status]}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </AppModal>
   );
 }
 
@@ -415,28 +580,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
   },
-  sheetOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    maxHeight: "80%",
-    backgroundColor: colors.bg,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.borderAlt,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  sheetHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 14,
-  },
-  sheetTitle: { fontFamily: fonts.uiSemiBold, fontSize: 18, color: colors.ink },
   sheetSearch: {
     flexDirection: "row",
     alignItems: "center",

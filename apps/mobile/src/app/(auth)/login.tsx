@@ -37,6 +37,7 @@ export default function LoginScreen() {
 			else await register.register({ email: email.trim(), password, name: name.trim() });
 			// AuthGate redirects to "/" on signedIn
 		} catch (err) {
+			console.error(err);
 			setError(
 				err instanceof ApiError && err.status === 401
 					? "e-mail ou senha inválidos"

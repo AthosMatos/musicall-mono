@@ -1,3 +1,4 @@
+import { colors } from "@/theme";
 import { appColors } from "@/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -158,20 +159,16 @@ export const AppSelect = ({
 			<AppModal visible={isOpen} onClose={handleClose} title={modalTitle} useScrollView={false}>
 				{searchable && (
 					<View
-						className="flex-row items-center mb-4 px-4 mx-4 h-11 rounded-lg"
-						style={{ backgroundColor: appColors.neutral.light }}
+						className="flex-row items-center mb-4 px-4 mx-4 h-11 rounded-lg border"
+						style={{ backgroundColor: colors.surfaceAlt, borderColor: colors.borderStrong }}
 					>
-						<Ionicons
-							name="search"
-							size={12}
-							color={appColors.neutral.medium}
-							style={{ marginRight: 8 }}
-						/>
+						<Ionicons name="search" size={12} color={colors.faint} style={{ marginRight: 8 }} />
 						<TextInput
 							className="flex-1 h-full"
 							placeholder={searchPlaceholder || "Buscar..."}
-							placeholderTextColor={appColors.neutral.medium}
-							style={{ color: appColors.neutral.dark }}
+							placeholderTextColor={colors.faint}
+							selectionColor={colors.accent}
+							style={{ color: colors.ink }}
 							value={searchQuery}
 							onChangeText={setSearchQuery}
 							autoCorrect={false}
@@ -179,7 +176,7 @@ export const AppSelect = ({
 						/>
 						{searchQuery?.length > 0 && (
 							<TouchableOpacity onPress={() => setSearchQuery("")}>
-								<Ionicons name="close-circle" size={12} color={appColors.neutral.medium} />
+								<Ionicons name="close-circle" size={12} color={colors.faint} />
 							</TouchableOpacity>
 						)}
 					</View>
@@ -193,13 +190,13 @@ export const AppSelect = ({
 						<TouchableOpacity
 							className="flex-row items-center justify-between py-4 px-4"
 							style={{
-								backgroundColor: value === item.id ? appColors.neutral.light : "transparent",
+								backgroundColor: value === item.id ? colors.surfaceActive : "transparent",
 							}}
 							onPress={() => handleSelect(item.id)}
 						>
-							<AppText style={{ color: appColors.neutral.dark }}>{item.name}</AppText>
+							<AppText style={{ color: colors.ink }}>{item.name}</AppText>
 							{value === item.id && (
-								<Ionicons name="checkmark-circle" size={16} color={appColors.neutral.dark} />
+								<Ionicons name="checkmark-circle" size={16} color={colors.accent} />
 							)}
 						</TouchableOpacity>
 					)}
@@ -207,9 +204,7 @@ export const AppSelect = ({
 					ListEmptyComponent={
 						searchable && searchQuery?.length > 0 ? (
 							<View className="py-4 items-center">
-								<AppText style={{ color: appColors.neutral.medium }}>
-									Nenhum resultado encontrado
-								</AppText>
+								<AppText style={{ color: colors.meta }}>Nenhum resultado encontrado</AppText>
 							</View>
 						) : null
 					}
