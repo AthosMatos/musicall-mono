@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { ImagePlus, X } from "lucide-react";
+import { ImagePlus } from "lucide-react";
 import type { CollectionLike } from "../lib/model";
 import { CollectionCover } from "./CollectionCover";
+import { AppModal } from "./ui/modal";
 
 type CollectionWithCover = CollectionLike & { coverMediaId: string | null };
 
@@ -11,6 +12,7 @@ type CollectionWithCover = CollectionLike & { coverMediaId: string | null };
  * parent owns the upload + mutation and closes on success.
  */
 export function EditCollectionDialog({
+  open,
   collection,
   title,
   description,
@@ -18,6 +20,7 @@ export function EditCollectionDialog({
   onSave,
   onClose,
 }: {
+  open: boolean;
   collection: CollectionWithCover;
   title: string;
   description: string;
@@ -32,7 +35,21 @@ export function EditCollectionDialog({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canSave = draftTitle.trim().length > 0 && !isSaving;
 
-  // revoke the object URL when it changes or the dialog unmounts
+  // Reset the draft to the current values each time the modal opens (adjust
+  // state during render — the previous cover preview is revoked by the cleanup
+  // effect below when `coverPreview` changes to null).
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setDraftTitle(title);
+      setDraftDescription(description);
+      setCoverFile(null);
+      setCoverPreview(null);
+    }
+  }
+
+  // Revoke the object URL when it changes or the dialog unmounts.
   useEffect(() => {
     return () => {
       if (coverPreview) URL.revokeObjectURL(coverPreview);
@@ -50,82 +67,13 @@ export function EditCollectionDialog({
   }
 
   return (
-    <div
-      onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="flex w-[460px] flex-col overflow-hidden rounded-2xl border border-border-alt bg-bg shadow-drag"
-      >
-        <header className="flex items-center gap-4 border-b border-border px-5 py-4">
-          <h2 className="m-0 flex-1 text-lg font-semibold text-ink">Editar coleção</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar"
-            className="flex cursor-pointer border-none bg-transparent p-0 text-[#7a7268] hover:text-ink-2"
-          >
-            <X size={20} />
-          </button>
-        </header>
-
-        <div className="flex gap-4 p-5">
-          {/* cover picker */}
-          <div className="shrink-0">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={onPickFile}
-              className="hidden"
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              aria-label="Alterar capa"
-              className="group relative block h-[92px] w-[92px] cursor-pointer overflow-hidden rounded-xl border-none p-0"
-            >
-              {coverPreview ? (
-                <div
-                  className="h-full w-full bg-cover bg-center"
-                  style={{ backgroundImage: `url(${coverPreview})` }}
-                />
-              ) : (
-                <CollectionCover collection={collection} className="h-full w-full" />
-              )}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-ink opacity-0 transition-opacity group-hover:opacity-100">
-                <ImagePlus size={22} />
-              </div>
-            </button>
-          </div>
-
-          {/* title + description */}
-          <div className="flex min-w-0 flex-1 flex-col gap-4">
-            <label className="flex flex-col gap-2">
-              <span className="font-mono text-[11px] tracking-[0.08em] text-meta uppercase">Título</span>
-              <input
-                autoFocus
-                value={draftTitle}
-                onChange={(e) => setDraftTitle(e.target.value)}
-                placeholder="Título da coleção"
-                className="h-11 rounded-xl border border-border-strong bg-surface-alt px-[15px] text-sm text-ink outline-none placeholder:text-faint focus:border-border-active"
-              />
-            </label>
-            <label className="flex flex-col gap-2">
-              <span className="font-mono text-[11px] tracking-[0.08em] text-meta uppercase">Descrição</span>
-              <textarea
-                value={draftDescription}
-                onChange={(e) => setDraftDescription(e.target.value)}
-                placeholder="Descrição (opcional)"
-                rows={3}
-                className="resize-none rounded-xl border border-border-strong bg-surface-alt px-[15px] py-3 text-sm leading-[1.5] text-ink outline-none placeholder:text-faint focus:border-border-active"
-              />
-            </label>
-          </div>
-        </div>
-
-        <footer className="flex justify-end gap-3 border-t border-border px-5 py-4">
+    <AppModal
+      open={open}
+      onClose={onClose}
+      title="Editar coleção"
+      className="w-[460px]"
+      footer={
+        <>
           <button
             type="button"
             onClick={onClose}
@@ -141,8 +89,63 @@ export function EditCollectionDialog({
           >
             {isSaving ? "Salvando…" : "Salvar"}
           </button>
-        </footer>
+        </>
+      }
+    >
+      <div className="flex gap-4">
+        {/* cover picker */}
+        <div className="shrink-0">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={onPickFile}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            aria-label="Alterar capa"
+            className="group relative block h-[92px] w-[92px] cursor-pointer overflow-hidden rounded-xl border-none p-0"
+          >
+            {coverPreview ? (
+              <div
+                className="h-full w-full bg-cover bg-center"
+                style={{ backgroundImage: `url(${coverPreview})` }}
+              />
+            ) : (
+              <CollectionCover collection={collection} className="h-full w-full" />
+            )}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-ink opacity-0 transition-opacity group-hover:opacity-100">
+              <ImagePlus size={22} />
+            </div>
+          </button>
+        </div>
+
+        {/* title + description */}
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          <label className="flex flex-col gap-2">
+            <span className="font-mono text-[11px] tracking-[0.08em] text-meta uppercase">Título</span>
+            <input
+              autoFocus
+              value={draftTitle}
+              onChange={(e) => setDraftTitle(e.target.value)}
+              placeholder="Título da coleção"
+              className="h-11 rounded-xl border border-border-strong bg-surface-alt px-[15px] text-sm text-ink outline-none placeholder:text-faint focus:border-border-active"
+            />
+          </label>
+          <label className="flex flex-col gap-2">
+            <span className="font-mono text-[11px] tracking-[0.08em] text-meta uppercase">Descrição</span>
+            <textarea
+              value={draftDescription}
+              onChange={(e) => setDraftDescription(e.target.value)}
+              placeholder="Descrição (opcional)"
+              rows={3}
+              className="resize-none rounded-xl border border-border-strong bg-surface-alt px-[15px] py-3 text-sm leading-[1.5] text-ink outline-none placeholder:text-faint focus:border-border-active"
+            />
+          </label>
+        </div>
       </div>
-    </div>
+    </AppModal>
   );
 }

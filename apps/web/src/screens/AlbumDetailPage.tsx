@@ -196,30 +196,28 @@ export default function AlbumDetailPage() {
         )}
       </div>
 
-      {addOpen && (
-        <AddTrackDialog
-          existingIds={tracks.map((t) => t.id)}
-          isAdding={addSong.isPending}
-          onClose={() => setAddOpen(false)}
-          onAdd={(songId) =>
-            addSong.mutate(
-              { id, body: { songId } },
-              { onSuccess: () => setAddOpen(false) },
-            )
-          }
-        />
-      )}
+      <AddTrackDialog
+        open={addOpen}
+        existingIds={tracks.map((t) => t.id)}
+        isAdding={addSong.isPending}
+        onClose={() => setAddOpen(false)}
+        onAdd={(songId) =>
+          addSong.mutate(
+            { id, body: { songId } },
+            { onSuccess: () => setAddOpen(false) },
+          )
+        }
+      />
 
-      {editOpen && (
-        <EditCollectionDialog
-          collection={album}
-          title={album.title}
-          description={album.description ?? ""}
-          isSaving={isSavingEdit}
-          onClose={() => setEditOpen(false)}
-          onSave={handleEditSave}
-        />
-      )}
+      <EditCollectionDialog
+        open={editOpen}
+        collection={album}
+        title={album.title}
+        description={album.description ?? ""}
+        isSaving={isSavingEdit}
+        onClose={() => setEditOpen(false)}
+        onSave={handleEditSave}
+      />
     </div>
   );
 }

@@ -7,8 +7,8 @@ import {
   collectionsSearchOptions,
   CreateCollectionDto,
 } from "@monorepo/core/api";
-import { CoverArt } from "../components/primitives";
-import { collectionCover, collectionStatusLabel, collectionTypeLabel } from "../lib/model";
+import { CollectionCover } from "../components/CollectionCover";
+import { collectionStatusLabel, collectionTypeLabel } from "../lib/model";
 
 const coverLabelColor: Record<string, string> = {
   EP: "#caa988",
@@ -63,8 +63,8 @@ export default function AlbumsPage() {
             const typeLabel = collectionTypeLabel(album);
             return (
               <Link key={album.id} to={`/albums/${album.id}`} className="no-underline">
-                <CoverArt
-                  variant={collectionCover(album)}
+                <CollectionCover
+                  collection={album}
                   className="flex aspect-square items-end rounded-card p-[14px]"
                 >
                   <span
@@ -73,7 +73,7 @@ export default function AlbumsPage() {
                   >
                     {typeLabel}
                   </span>
-                </CoverArt>
+                </CollectionCover>
                 <div className="mt-[11px] text-[17px] font-semibold text-ink">{album.title}</div>
                 <div className="mt-[2px] font-mono text-xs text-meta-2">
                   {album.type === "single" ? "single" : "álbum"} · {collectionStatusLabel[album.status]}

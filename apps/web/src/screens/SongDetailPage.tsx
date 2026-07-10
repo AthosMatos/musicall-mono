@@ -292,14 +292,13 @@ export default function SongDetailPage() {
         </aside>
       </div>
 
-      {editOpen && (
-        <EditSongDialog
-          title={song.title}
-          isSaving={updateSong.isPending}
-          onSave={(title) => updateSong.mutate({ id: song.id, body: { title } })}
-          onClose={() => setEditOpen(false)}
-        />
-      )}
+      <EditSongDialog
+        open={editOpen}
+        title={song.title}
+        isSaving={updateSong.isPending}
+        onSave={(title) => updateSong.mutate({ id: song.id, body: { title } })}
+        onClose={() => setEditOpen(false)}
+      />
     </div>
   );
 }
