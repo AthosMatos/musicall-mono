@@ -19,8 +19,11 @@ let refreshInFlight: Promise<string | null> | null = null;
 
 async function doRefresh(): Promise<string | null> {
   try {
+    // The refresh token travels in the httpOnly cookie, but the DTO still
+    // requires an object body — an empty POST fails validation with a 400.
     const tokens = await api.request<AuthTokens>("/api/auth/refresh", {
       method: "POST",
+      body: {},
       anonymous: true,
     });
     accessToken = tokens.accessToken;

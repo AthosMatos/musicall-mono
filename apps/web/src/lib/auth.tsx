@@ -6,6 +6,13 @@ import { refreshSession, setAccessToken } from "./api";
 import { AuthContext, useAuth, type AuthStatus } from "./auth-context";
 import { queryClient } from "./query";
 
+/**
+ * The refresh cookie is httpOnly (invisible to JS), so this flag mirrors
+ * "a session was started here". It lets a signed-out visitor (e.g. on /login)
+ * skip the doomed POST /auth/refresh probe on every page load.
+ */
+const HAS_SESSION_KEY = "musicall.has-session";
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [user, setUser] = useState<UserResponseDto | null>(null);
@@ -16,6 +23,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      if (!localStorage.getItem(HAS_SESSION_KEY)) {
+        setStatus("signedOut");
+        return;
+      }
       const token = await refreshSession();
       if (cancelled) return;
       if (!token) {
@@ -41,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const finishSignIn = useCallback(async (tokens: AuthTokens) => {
     setAccessToken(tokens.accessToken);
     const me = await usersGetMe();
+    localStorage.setItem(HAS_SESSION_KEY, "1");
     setUser(me);
     setStatus("signedIn");
   }, []);
@@ -65,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // revoking a dead session is fine
     }
+    localStorage.removeItem(HAS_SESSION_KEY);
     setAccessToken(null);
     setUser(null);
     setStatus("signedOut");
@@ -84,7 +97,11 @@ export function RequireAuth() {
   const location = useLocation();
 
   if (status === "loading") {
-    return <div className="min-h-svh bg-bg" />;
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-bg">
+        <span className="font-mono text-sm text-faint">restaurando sessão…</span>
+      </div>
+    );
   }
   if (status === "signedOut") {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;

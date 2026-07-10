@@ -21,6 +21,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:r2": "ts-node scripts/test-r2-upload.ts",
     "generate:spec": "curl -sf http://localhost:3000/docs-json -o openapi.json || (echo '❌ Server not running on :3000 (need the API up to fetch the OpenAPI spec)' && exit 1)",
     "generate:client": "openapi --input ./openapi.json --output ../../packages/core/src/api/generated --client fetch --exportServices false --exportCore false --exportSchemas false",
     "generate:hooks": "node scripts/generate-api-hooks.js",

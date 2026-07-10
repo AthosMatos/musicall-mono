@@ -17,6 +17,12 @@ export interface ApiClientConfig {
   refreshAccessToken?: () => Promise<string | null>;
   /** Include credentials (httpOnly refresh cookie) — true on web. */
   withCredentials?: boolean;
+  /**
+   * Per-request timeout in ms (default 15000). Without one, a hung connection
+   * (API mid-restart, dead socket after sleep) stalls callers forever — e.g.
+   * the session restore on page load, leaving the app stuck on its splash.
+   */
+  timeoutMs?: number;
 }
 
 export class ApiError extends Error {
@@ -52,6 +58,7 @@ export class ApiClient {
     this.http = axios.create({
       baseURL: config.baseUrl.replace(/\/$/, ''),
       withCredentials: config.withCredentials ?? false,
+      timeout: config.timeoutMs ?? 15_000,
     });
   }
 

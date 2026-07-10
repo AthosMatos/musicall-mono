@@ -1,8 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import {
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
 import type { AuthTokens } from '@monorepo/core';
 import * as argon2 from 'argon2';
@@ -11,6 +8,15 @@ import { MailerService } from '../common/mailer/mailer.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 const RESET_TOKEN_TYPE = 'pwd_reset';
+
+/**
+ * How long a just-rotated refresh token stays acceptable. Rotation responses
+ * can be lost in transit (page reload aborts the request after the server
+ * already revoked the old token), which would strand the browser with a dead
+ * cookie and silently log the user out. Within this window the presented
+ * token is honored again and a fresh pair is issued.
+ */
+const REFRESH_REUSE_GRACE_MS = 60_000;
 
 interface ResetTokenPayload {
   sub: string;
@@ -49,8 +55,10 @@ export class AuthService {
   /** Rotate: validate the presented refresh token, revoke it, issue a new pair. */
   async refresh(rawToken: string | undefined): Promise<AuthTokens> {
     const record = await this.findValidRefreshToken(rawToken);
-    await this.prisma.refreshToken.update({
-      where: { id: record.id },
+    // Only stamp the first revocation — a grace-window reuse must not push
+    // `revokedAt` forward, or the token could be replayed indefinitely.
+    await this.prisma.refreshToken.updateMany({
+      where: { id: record.id, revokedAt: null },
       data: { revokedAt: new Date() },
     });
     const user = await this.prisma.user.findUnique({
@@ -79,7 +87,11 @@ export class AuthService {
       { secret: this.config.get('JWT_REFRESH_SECRET'), expiresIn: '1h' },
     );
     const resetUrl = `${this.config.get('WEB_ORIGIN')}/reset-password?token=${token}`;
-    await this.mailer.sendPasswordReset({ to: email, resetToken: token, resetUrl });
+    await this.mailer.sendPasswordReset({
+      to: email,
+      resetToken: token,
+      resetUrl,
+    });
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
@@ -145,9 +157,12 @@ export class AuthService {
       throw new UnauthorizedException('Malformed refresh token');
     }
     const record = await this.prisma.refreshToken.findUnique({ where: { id } });
+    const revokedOutsideGrace =
+      record?.revokedAt != null &&
+      Date.now() - record.revokedAt.getTime() > REFRESH_REUSE_GRACE_MS;
     if (
       !record ||
-      record.revokedAt ||
+      revokedOutsideGrace ||
       record.expiresAt.getTime() < Date.now() ||
       !(await argon2.verify(record.tokenHash, secret))
     ) {

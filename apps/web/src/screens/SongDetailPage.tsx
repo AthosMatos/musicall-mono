@@ -8,11 +8,15 @@ import {
   lyricsListOptions,
   lyricsRemoveOptions,
   mediaListForSongOptions,
+  songsGetKey,
   songsGetOptions,
+  songsListKey,
+  songsUpdateOptions,
   tabsListOptions,
 } from "@monorepo/core/api";
 import { LyricBody } from "../components/LyricBody";
 import { PlayerCard } from "../components/Player";
+import { EditSongDialog } from "../components/EditSongDialog";
 import { MetaChip, MonoLabel, SavedIndicator, StatusPill } from "../components/primitives";
 import { shortDate, statusLabel } from "../lib/model";
 
@@ -26,6 +30,7 @@ export default function SongDetailPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Letra");
   const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,6 +53,15 @@ export default function SongDetailPage() {
     onSuccess: () => {
       setActiveVersionId(null);
       return queryClient.invalidateQueries({ queryKey: lyricsListKey(id) });
+    },
+  });
+
+  const updateSong = useMutation({
+    ...songsUpdateOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: songsGetKey(id) });
+      queryClient.invalidateQueries({ queryKey: songsListKey() });
+      setEditOpen(false);
     },
   });
 
@@ -100,6 +114,16 @@ export default function SongDetailPage() {
           </button>
           {menuOpen && (
             <div className="absolute right-0 top-[calc(100%+8px)] z-20 w-[180px] overflow-hidden rounded-xl border border-border-alt bg-bg py-1 shadow-drag">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setEditOpen(true);
+                }}
+                className="flex w-full cursor-pointer items-center gap-[10px] border-none bg-transparent px-4 py-[10px] text-left text-sm text-ink-3 hover:bg-surface-active hover:text-ink"
+              >
+                <Pencil size={15} /> Editar música
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -267,6 +291,15 @@ export default function SongDetailPage() {
           </section>
         </aside>
       </div>
+
+      {editOpen && (
+        <EditSongDialog
+          title={song.title}
+          isSaving={updateSong.isPending}
+          onSave={(title) => updateSong.mutate({ id: song.id, body: { title } })}
+          onClose={() => setEditOpen(false)}
+        />
+      )}
     </div>
   );
 }
