@@ -1,24 +1,26 @@
-import { useEffect, useRef, useState } from "react";
 import { Audio, type AVPlaybackStatus } from "expo-av";
-import { mediaGetUrl } from "@monorepo/core/api";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * Streams a MediaAsset through expo-av, fed by a short-lived signed URL from
- * `GET /api/media/{id}/url` (ADR-0002 — bytes come straight from storage).
+ * Plays a `MediaAsset` straight off the device — the URI is a local file in the
+ * app's document directory, so there is nothing to fetch or sign.
  */
-export function useAudioPlayback(assetId: string, initialDurationSec: number | null) {
+export function useAudioPlayback(uri: string, initialDurationSec: number | null) {
   const soundRef = useRef<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState(initialDurationSec ?? 0);
   const [error, setError] = useState(false);
 
+  // A different asset means the loaded sound is stale — drop it.
   useEffect(() => {
     return () => {
       void soundRef.current?.unloadAsync();
       soundRef.current = null;
+      setIsPlaying(false);
+      setElapsed(0);
     };
-  }, [assetId]);
+  }, [uri]);
 
   function onStatus(status: AVPlaybackStatus) {
     if (!status.isLoaded) return;
@@ -30,11 +32,40 @@ export function useAudioPlayback(assetId: string, initialDurationSec: number | n
     }
   }
 
+  /**
+   * Jumps to a fraction (0–1) of the track. Works before the first play too:
+   * the sound is loaded paused at the requested spot rather than ignored.
+   */
+  async function seek(ratio: number) {
+    const target = Math.min(1, Math.max(0, ratio));
+    try {
+      if (!soundRef.current) {
+        const positionMillis = Math.round(target * duration * 1000);
+        const { sound } = await Audio.Sound.createAsync(
+          { uri },
+          { positionMillis, shouldPlay: false },
+          onStatus
+        );
+        soundRef.current = sound;
+        setElapsed(positionMillis / 1000);
+        return;
+      }
+      const status = await soundRef.current.getStatusAsync();
+      if (!status.isLoaded) return;
+      // Prefer the loaded track's real length over the stored metadata.
+      const totalMillis = status.durationMillis ?? duration * 1000;
+      const positionMillis = Math.round(target * totalMillis);
+      await soundRef.current.setPositionAsync(positionMillis);
+      setElapsed(positionMillis / 1000);
+    } catch {
+      setError(true);
+    }
+  }
+
   async function toggle() {
     try {
       if (!soundRef.current) {
-        const { url } = await mediaGetUrl(assetId);
-        const { sound } = await Audio.Sound.createAsync({ uri: url }, { shouldPlay: true }, onStatus);
+        const { sound } = await Audio.Sound.createAsync({ uri }, { shouldPlay: true }, onStatus);
         soundRef.current = sound;
         setIsPlaying(true);
         return;
@@ -59,5 +90,6 @@ export function useAudioPlayback(assetId: string, initialDurationSec: number | n
     error,
     progress: duration ? elapsed / duration : 0,
     toggle,
+    seek,
   };
 }

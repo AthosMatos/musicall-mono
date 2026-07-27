@@ -1,0 +1,194 @@
+{
+  "common": {
+    "loading": "carregando…",
+    "saving": "salvando…",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "close": "Fechar",
+    "add": "Adicionar",
+    "continue": "Continuar",
+    "skip": "Pular",
+    "seeAll": "ver tudo",
+    "search": "Buscar…",
+    "saved": "salvo",
+    "genericError": "algo deu errado",
+    "moveToTrash": "Mover para a lixeira"
+  },
+  "onboarding": {
+    "profileTitle": "Como podemos te chamar?",
+    "profileSubtitle": "Esse nome aparece na sua tela inicial. Você pode mudar depois.",
+    "namePlaceholder": "Seu nome",
+    "photoAdd": "Adicionar foto",
+    "photoChange": "Trocar foto",
+    "photoOptional": "opcional",
+    "photoError": "não foi possível carregar a imagem",
+    "start": "Começar"
+  },
+  "home": {
+    "greeting": "Olá, {{name}}",
+    "continueLabel": "continuar onde parou",
+    "recents": "Recentes",
+    "collections": "Álbuns",
+    "emptyFirstSong": "sua primeira música começa aqui",
+    "emptyCollections": "nenhuma coleção ainda"
+  },
+  "songs": {
+    "title": "Músicas",
+    "count_one": "{{count}} música",
+    "count_other": "{{count}} músicas",
+    "empty": "nenhuma música ainda",
+    "emptySearch": "nenhuma música encontrada"
+  },
+  "albums": {
+    "title": "Álbuns",
+    "count_one": "{{count}} coleção",
+    "count_other": "{{count}} coleções",
+    "filterAll": "Todos",
+    "filterAlbums": "EP / Álbum",
+    "filterSingles": "Singles",
+    "new": "Novo álbum",
+    "newPrompt": "Nome do álbum:",
+    "newDefaultTitle": "Novo álbum"
+  },
+  "song": {
+    "notFound": "música não encontrada",
+    "tabLyrics": "Letra",
+    "tabChords": "Cifra",
+    "tabTab": "Tab",
+    "tabAudio": "Áudios",
+    "tabImages": "Imagens",
+    "keyChip": "Tom · {{key}}",
+    "bpmChip": "{{bpm}} BPM",
+    "currentVersion": "{{label}} · atual",
+    "menuEditLyrics": "Editar letra",
+    "menuNewVersion": "Nova versão",
+    "menuDeleteLyrics": "Excluir letra",
+    "menuDeleteSong": "Mover para a lixeira",
+    "deleteLyricsTitle": "Excluir letra",
+    "deleteLyricsMessage": "Excluir a versão \"{{label}}\" da letra?",
+    "deleteSongTitle": "Mover para a lixeira",
+    "deleteSongMessage": "Mover \"{{title}}\" para a lixeira? Você pode restaurar depois em Perfil › Lixeira.",
+    "emptyLyrics": "sem letra ainda",
+    "emptyLyricsAction": "escrever letra",
+    "emptyChords": "sem cifra ainda",
+    "emptyChordsAction": "adicionar cifra",
+    "emptyTab": "sem tablatura ainda",
+    "emptyTabAction": "adicionar tab",
+    "emptyAudio": "sem áudios ainda",
+    "emptyImages": "sem imagens ainda",
+    "addImage": "adicionar imagem",
+    "recordIdea": "gravar ideia",
+    "importAudio": "importar do dispositivo",
+    "importing": "importando…",
+    "playbackError": "erro",
+    "titlePlaceholder": "Título da música"
+  },
+  "lyrics": {
+    "editing": "editando",
+    "newVersion": "nova versão",
+    "saveError": "erro ao salvar",
+    "placeholder": "[verso 1]\nescreva a primeira linha…",
+    "sectionVerse": "verso",
+    "sectionChorus": "refrão",
+    "sectionBridge": "ponte"
+  },
+  "chords": {
+    "editTitle": "Cifra",
+    "placeholder": "Am        C\nescreva a cifra aqui…"
+  },
+  "tab": {
+    "editTitle": "Tablatura",
+    "placeholder": "e|-----------------|\nB|-----------------|"
+  },
+  "album": {
+    "notFound": "coleção não encontrada",
+    "trackCount_one": "{{count}} faixa",
+    "trackCount_other": "{{count}} faixas",
+    "tracksLabel": "Faixas · arraste para reordenar",
+    "emptyTracks": "nenhuma faixa ainda",
+    "addTrack": "Adicionar faixa",
+    "removeTrack": "Remover da coleção",
+    "editTitle": "Editar coleção",
+    "fieldTitle": "Título",
+    "fieldTitlePlaceholder": "Título da coleção",
+    "fieldDescription": "Descrição",
+    "fieldDescriptionPlaceholder": "Descrição (opcional)",
+    "deleteTitle": "Mover para a lixeira",
+    "deleteMessage": "Mover esta coleção para a lixeira? As faixas não serão apagadas.",
+    "searchSongs": "Buscar músicas…",
+    "noCandidates": "todas as músicas já estão nesta coleção",
+    "noResults": "nenhuma música encontrada",
+    "createSong": "Criar nova música",
+    "photos": "Fotos",
+    "addPhoto": "Adicionar",
+    "setCover": "Definir como capa",
+    "removePhoto": "Remover foto",
+    "coverBadge": "capa"
+  },
+  "capture": {
+    "title": "Nova música",
+    "titlePlaceholder": "Título (opcional)",
+    "recording": "gravando ideia…",
+    "takeReady": "gravação pronta",
+    "tapToRecord": "toque para gravar",
+    "snippetLabel": "trecho de letra",
+    "snippetPlaceholder": "anota uma frase enquanto grava…",
+    "discard": "Descartar",
+    "saveDraft": "Salvar rascunho",
+    "untitled": "ideia sem nome",
+    "recordingName": "gravação",
+    "errorPermission": "permissão de microfone negada",
+    "errorStart": "não foi possível iniciar a gravação",
+    "errorSave": "erro ao salvar"
+  },
+  "profile": {
+    "title": "Perfil",
+    "stats": "{{songs}} · {{collections}}",
+    "storedLocally": "salvo no dispositivo",
+    "sectionProfile": "Perfil",
+    "sectionAppearance": "Aparência",
+    "sectionData": "Seus dados",
+    "rowName": "Nome",
+    "rowLanguage": "Idioma",
+    "rowPhoto": "Foto",
+    "rowTheme": "Tema",
+    "rowThemeValue": "escuro",
+    "rowStorage": "Armazenamento",
+    "rowTrash": "Lixeira",
+    "editTitle": "Editar perfil",
+    "languageTitle": "Idioma"
+  },
+  "trash": {
+    "title": "Lixeira",
+    "empty": "a lixeira está vazia",
+    "songs": "Músicas",
+    "collections": "Coleções",
+    "restore": "Restaurar",
+    "purge": "Excluir definitivamente",
+    "purgeTitle": "Excluir definitivamente",
+    "purgeMessage": "\"{{title}}\" será apagada para sempre, junto com áudios, letras e cifras."
+  },
+  "media": {
+    "emptyFile": "arquivo de áudio vazio",
+    "importError": "não foi possível importar o arquivo"
+  },
+  "status": {
+    "song": {
+      "draft": "rascunho",
+      "in_progress": "em progresso",
+      "finished": "finalizada"
+    },
+    "collection": {
+      "draft": "rascunho",
+      "in_progress": "em progresso",
+      "released": "finalizado"
+    }
+  },
+  "collectionType": {
+    "album": "álbum",
+    "single": "single",
+    "albumShort": "EP"
+  }
+}

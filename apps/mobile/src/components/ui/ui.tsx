@@ -1,5 +1,16 @@
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import { useRef, useState } from "react";
+import {
+  PanResponder,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { SongStatus } from "@monorepo/core";
 import type { CoverVariant } from "@/lib/model";
@@ -35,13 +46,24 @@ export function StatusPill({ status, label }: { status: SongStatus; label: strin
 
 export function CoverArt({
   variant,
+  uri,
   style,
   children,
 }: {
   variant: CoverVariant;
+  /** Real artwork. When set it wins over the generated gradient. */
+  uri?: string | null;
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
 }) {
+  if (uri) {
+    return (
+      <View style={style}>
+        <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
+        {children}
+      </View>
+    );
+  }
   if (variant === "none") {
     return <View style={[styles.coverNone, style]}>{children}</View>;
   }
@@ -87,14 +109,54 @@ export function Waveform({
   samples,
   progress,
   height,
+  onSeek,
 }: {
   samples: number[];
   progress: number;
   height: number;
+  /** Supplying this makes the waveform tappable and draggable to scrub. */
+  onSeek?: (ratio: number) => void;
 }) {
-  const playedBars = Math.round(progress * samples.length);
+  const width = useRef(0);
+  // While dragging, render the finger's position instead of playback's, so the
+  // bar tracks the thumb rather than lagging behind the audio.
+  const [scrub, setScrub] = useState<number | null>(null);
+
+  // Handlers read through refs so the responder, created once, never goes stale.
+  const onSeekRef = useRef(onSeek);
+  onSeekRef.current = onSeek;
+
+  const ratioAt = (x: number) =>
+    width.current > 0 ? Math.min(1, Math.max(0, x / width.current)) : 0;
+
+  const responder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => !!onSeekRef.current,
+      onMoveShouldSetPanResponder: () => !!onSeekRef.current,
+      onPanResponderGrant: (e) => setScrub(ratioAt(e.nativeEvent.locationX)),
+      onPanResponderMove: (e) => setScrub(ratioAt(e.nativeEvent.locationX)),
+      onPanResponderRelease: (e) => {
+        const ratio = ratioAt(e.nativeEvent.locationX);
+        setScrub(null);
+        onSeekRef.current?.(ratio);
+      },
+      onPanResponderTerminate: () => setScrub(null),
+    })
+  ).current;
+
+  const shown = scrub ?? progress;
+  const playedBars = Math.round(shown * samples.length);
+
   return (
-    <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 2, height }}>
+    <View
+      {...(onSeek ? responder.panHandlers : null)}
+      onLayout={(e) => {
+        width.current = e.nativeEvent.layout.width;
+      }}
+      // The bars are only a couple of dozen points tall — widen the touch area.
+      hitSlop={onSeek ? { top: 12, bottom: 12, left: 4, right: 4 } : undefined}
+      style={{ flexDirection: "row", alignItems: "flex-end", gap: 2, height }}
+    >
       {samples.map((h, i) => (
         <View
           key={i}
@@ -103,7 +165,11 @@ export function Waveform({
             borderRadius: 1,
             height: `${h}%`,
             backgroundColor:
-              i < playedBars ? colors.wavePlayed : i === playedBars ? colors.waveWarm : colors.waveMuted,
+              i < playedBars
+                ? colors.wavePlayed
+                : i === playedBars
+                  ? colors.waveWarm
+                  : colors.waveMuted,
           }}
         />
       ))}

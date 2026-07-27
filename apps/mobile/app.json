@@ -2,7 +2,7 @@
   "expo": {
     "name": "MusicAll",
     "slug": "MusicAll",
-    "version": "0.1.0",
+    "version": "0.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "MusicAll",
@@ -16,7 +16,7 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.athosladies.MusicAll",
-			"buildNumber": "3"
+			"buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -27,7 +27,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.athosladies.MusicAll",
-			"versionCode": 3
+			"versionCode": 1
     },
     "plugins": [
       "expo-router",
@@ -42,11 +42,11 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "expo-secure-store",
+      "expo-localization",
       [
         "expo-image-picker",
         {
-          "photosPermission": "O aplicativo precisa acessar suas fotos para definir a foto de perfil."
+          "photosPermission": "O aplicativo precisa acessar suas fotos para definir a foto de perfil. / The app needs access to your photos to set your profile picture."
         }
       ]
     ],

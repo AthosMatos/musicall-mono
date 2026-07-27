@@ -1,8 +1,8 @@
 import type { CollectionStatus, CollectionType, SongStatus } from "@monorepo/core";
+import type { TFunction } from "i18next";
 
-// Presentation helpers mapping API DTOs to what the screens render. Parameters
-// are structural because the codegen types list items as string unions but
-// single responses as TS enums — both satisfy these shapes.
+// Presentation helpers mapping stored records to what the screens render.
+// Parameters are structural so both Realm objects and plain literals fit.
 
 export type CoverVariant = "warm" | "neutral" | "terracotta" | "sage" | "demos" | "none";
 
@@ -18,17 +18,13 @@ export interface CollectionLike {
   type: CollectionType;
 }
 
-export const statusLabel: Record<SongStatus, string> = {
-  draft: "rascunho",
-  in_progress: "em progresso",
-  finished: "finalizada",
-};
+export function songStatusLabel(status: SongStatus, t: TFunction): string {
+  return t(`status.song.${status}`);
+}
 
-export const collectionStatusLabel: Record<CollectionStatus, string> = {
-  draft: "rascunho",
-  in_progress: "em progresso",
-  released: "finalizado",
-};
+export function collectionStatusLabel(status: CollectionStatus, t: TFunction): string {
+  return t(`status.collection.${status}`);
+}
 
 const songVariants: CoverVariant[] = ["warm", "neutral", "terracotta", "sage"];
 const collectionVariants: CoverVariant[] = ["terracotta", "demos", "sage", "warm"];
@@ -50,31 +46,36 @@ export function collectionCover(collection: CollectionLike): CoverVariant {
 }
 
 /** "EP" for multi-track albums, "single" for singles — cover corner label. */
-export function collectionTypeLabel(collection: CollectionLike): string {
-  return collection.type === "single" ? "single" : "EP";
+export function collectionTypeLabel(collection: CollectionLike, t: TFunction): string {
+  return collection.type === "single" ? t("collectionType.single") : t("collectionType.albumShort");
+}
+
+/** The long form used in list subtitles: "album" / "single". */
+export function collectionTypeName(collection: CollectionLike, t: TFunction): string {
+  return t(`collectionType.${collection.type}`);
 }
 
 /** "Lá · 92 BPM", falling back to the status for metadata-less drafts. */
-export function songMeta(song: SongLike): string {
+export function songMeta(song: SongLike, t: TFunction): string {
   if (song.key && song.bpm) return `${song.key} · ${song.bpm} BPM`;
   if (song.key) return song.key;
   if (song.bpm) return `${song.bpm} BPM`;
-  return statusLabel[song.status];
+  return songStatusLabel(song.status, t);
 }
 
-const monthsPt = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
-
-/** "12 mar" */
-export function shortDate(iso: string): string {
-  const d = new Date(iso);
-  return `${d.getDate()} ${monthsPt[d.getMonth()]}`;
+/** "23 de jun" (pt-BR) / "Jun 23" (en-US). */
+export function shortDate(date: Date, locale: string): string {
+  return date
+    .toLocaleDateString(locale, { day: "numeric", month: "short" })
+    .replace(/\.$/, "");
 }
 
-/** "terça · 23 jun" */
-export function todayLabel(): string {
+/** "terça · 23 de jun" / "Tuesday · Jun 23" */
+export function todayLabel(locale: string): string {
   const now = new Date();
-  const weekday = now.toLocaleDateString("pt-BR", { weekday: "long" }).split("-")[0];
-  return `${weekday} · ${now.getDate()} ${monthsPt[now.getMonth()]}`;
+  // pt-BR renders "terça-feira"; the design only wants the first word.
+  const weekday = now.toLocaleDateString(locale, { weekday: "long" }).split("-")[0];
+  return `${weekday} · ${shortDate(now, locale)}`;
 }
 
 /** "2:34" from seconds. */
@@ -85,7 +86,7 @@ export function formatDuration(seconds: number | null): string | null {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-/** Decorative waveform bars (the API stores no waveform data). */
+/** Decorative waveform bars (no waveform data is stored). */
 export function waveformSamples(seed: string, count = 14): number[] {
   const samples: number[] = [];
   let h = hash(seed) || 1;

@@ -1,8 +1,12 @@
-import { useAuth } from "@/auth/auth.provider";
+import { hasOnboarded, useProfile } from "@/db";
 import { Redirect } from "expo-router";
 
 export default function IndexPage() {
-  const { isLoggedIn } = useAuth();
+  const profile = useProfile();
 
-  return isLoggedIn ? <Redirect href="/(protected)/(tabs)/home" /> : <Redirect href="/(auth)" />;
+  return hasOnboarded(profile) ? (
+    <Redirect href="/(app)/(tabs)/home" />
+  ) : (
+    <Redirect href="/(onboarding)" />
+  );
 }

@@ -1,0 +1,194 @@
+{
+  "common": {
+    "loading": "loading…",
+    "saving": "saving…",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "add": "Add",
+    "continue": "Continue",
+    "skip": "Skip",
+    "seeAll": "see all",
+    "search": "Search…",
+    "saved": "saved",
+    "genericError": "something went wrong",
+    "moveToTrash": "Move to trash"
+  },
+  "onboarding": {
+    "profileTitle": "What should we call you?",
+    "profileSubtitle": "This name shows up on your home screen. You can change it later.",
+    "namePlaceholder": "Your name",
+    "photoAdd": "Add photo",
+    "photoChange": "Change photo",
+    "photoOptional": "optional",
+    "photoError": "couldn't load that image",
+    "start": "Get started"
+  },
+  "home": {
+    "greeting": "Hi, {{name}}",
+    "continueLabel": "pick up where you left off",
+    "recents": "Recent",
+    "collections": "Albums",
+    "emptyFirstSong": "your first song starts here",
+    "emptyCollections": "no collections yet"
+  },
+  "songs": {
+    "title": "Songs",
+    "count_one": "{{count}} song",
+    "count_other": "{{count}} songs",
+    "empty": "no songs yet",
+    "emptySearch": "no songs found"
+  },
+  "albums": {
+    "title": "Albums",
+    "count_one": "{{count}} collection",
+    "count_other": "{{count}} collections",
+    "filterAll": "All",
+    "filterAlbums": "EP / Album",
+    "filterSingles": "Singles",
+    "new": "New album",
+    "newPrompt": "Album name:",
+    "newDefaultTitle": "New album"
+  },
+  "song": {
+    "notFound": "song not found",
+    "tabLyrics": "Lyrics",
+    "tabChords": "Chords",
+    "tabTab": "Tab",
+    "tabAudio": "Audio",
+    "tabImages": "Images",
+    "keyChip": "Key · {{key}}",
+    "bpmChip": "{{bpm}} BPM",
+    "currentVersion": "{{label}} · current",
+    "menuEditLyrics": "Edit lyrics",
+    "menuNewVersion": "New version",
+    "menuDeleteLyrics": "Delete lyrics",
+    "menuDeleteSong": "Move to trash",
+    "deleteLyricsTitle": "Delete lyrics",
+    "deleteLyricsMessage": "Delete the \"{{label}}\" lyric version?",
+    "deleteSongTitle": "Move to trash",
+    "deleteSongMessage": "Move \"{{title}}\" to the trash? You can restore it later from Profile › Trash.",
+    "emptyLyrics": "no lyrics yet",
+    "emptyLyricsAction": "write lyrics",
+    "emptyChords": "no chord chart yet",
+    "emptyChordsAction": "add chords",
+    "emptyTab": "no tablature yet",
+    "emptyTabAction": "add tab",
+    "emptyAudio": "no audio yet",
+    "emptyImages": "no images yet",
+    "addImage": "add image",
+    "recordIdea": "record idea",
+    "importAudio": "import from device",
+    "importing": "importing…",
+    "playbackError": "error",
+    "titlePlaceholder": "Song title"
+  },
+  "lyrics": {
+    "editing": "editing",
+    "newVersion": "new version",
+    "saveError": "couldn't save",
+    "placeholder": "[verse 1]\nwrite the first line…",
+    "sectionVerse": "verse",
+    "sectionChorus": "chorus",
+    "sectionBridge": "bridge"
+  },
+  "chords": {
+    "editTitle": "Chords",
+    "placeholder": "Am        C\nwrite the chord chart here…"
+  },
+  "tab": {
+    "editTitle": "Tablature",
+    "placeholder": "e|-----------------|\nB|-----------------|"
+  },
+  "album": {
+    "notFound": "collection not found",
+    "trackCount_one": "{{count}} track",
+    "trackCount_other": "{{count}} tracks",
+    "tracksLabel": "Tracks · drag to reorder",
+    "emptyTracks": "no tracks yet",
+    "addTrack": "Add track",
+    "removeTrack": "Remove from collection",
+    "editTitle": "Edit collection",
+    "fieldTitle": "Title",
+    "fieldTitlePlaceholder": "Collection title",
+    "fieldDescription": "Description",
+    "fieldDescriptionPlaceholder": "Description (optional)",
+    "deleteTitle": "Move to trash",
+    "deleteMessage": "Move this collection to the trash? The songs themselves are kept.",
+    "searchSongs": "Search songs…",
+    "noCandidates": "every song is already in this collection",
+    "noResults": "no songs found",
+    "createSong": "Create a new song",
+    "photos": "Photos",
+    "addPhoto": "Add",
+    "setCover": "Set as cover",
+    "removePhoto": "Remove photo",
+    "coverBadge": "cover"
+  },
+  "capture": {
+    "title": "New song",
+    "titlePlaceholder": "Title (optional)",
+    "recording": "recording idea…",
+    "takeReady": "take ready",
+    "tapToRecord": "tap to record",
+    "snippetLabel": "lyric snippet",
+    "snippetPlaceholder": "jot a line down while you record…",
+    "discard": "Discard",
+    "saveDraft": "Save draft",
+    "untitled": "untitled idea",
+    "recordingName": "recording",
+    "errorPermission": "microphone permission denied",
+    "errorStart": "couldn't start recording",
+    "errorSave": "couldn't save"
+  },
+  "profile": {
+    "title": "Profile",
+    "stats": "{{songs}} · {{collections}}",
+    "storedLocally": "stored on this device",
+    "sectionProfile": "Profile",
+    "sectionAppearance": "Appearance",
+    "sectionData": "Your data",
+    "rowName": "Name",
+    "rowLanguage": "Language",
+    "rowPhoto": "Photo",
+    "rowTheme": "Theme",
+    "rowThemeValue": "dark",
+    "rowStorage": "Storage",
+    "rowTrash": "Trash",
+    "editTitle": "Edit profile",
+    "languageTitle": "Language"
+  },
+  "trash": {
+    "title": "Trash",
+    "empty": "the trash is empty",
+    "songs": "Songs",
+    "collections": "Collections",
+    "restore": "Restore",
+    "purge": "Delete permanently",
+    "purgeTitle": "Delete permanently",
+    "purgeMessage": "\"{{title}}\" will be gone for good, along with its audio, lyrics and chords."
+  },
+  "media": {
+    "emptyFile": "empty audio file",
+    "importError": "couldn't import that file"
+  },
+  "status": {
+    "song": {
+      "draft": "draft",
+      "in_progress": "in progress",
+      "finished": "finished"
+    },
+    "collection": {
+      "draft": "draft",
+      "in_progress": "in progress",
+      "released": "released"
+    }
+  },
+  "collectionType": {
+    "album": "album",
+    "single": "single",
+    "albumShort": "EP"
+  }
+}

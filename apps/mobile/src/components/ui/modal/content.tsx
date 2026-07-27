@@ -1,7 +1,15 @@
 import { colors } from "@/theme";
 import { ChevronLeft, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Dimensions, type DimensionValue, ScrollView, TouchableOpacity, View } from "react-native";
+import {
+	Dimensions,
+	type DimensionValue,
+	Keyboard,
+	Platform,
+	ScrollView,
+	TouchableOpacity,
+	View,
+} from "react-native";
 import Reanimated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../text";
@@ -32,18 +40,44 @@ export const AppModalContent = (props: AppModalProps) => {
 	} = props;
 	const insets = useSafeAreaInsets();
 	const containerBottom = useSharedValue<DimensionValue>("-100%");
+	const keyboardOffset = useSharedValue(0);
 
 	const containerAnimatedStyle = useAnimatedStyle(() => {
 		return {
 			bottom: containerBottom.value,
+			transform: [{ translateY: keyboardOffset.value }],
 		};
-	}, [containerBottom]);
+	}, [containerBottom, keyboardOffset]);
 
 	useEffect(() => {
 		containerBottom.value = withTiming(visible ? "0%" : `-100%`, {
 			duration,
 		});
 	}, [visible, containerBottom]);
+
+	// The sheet is bottom-anchored inside a native Modal, so the keyboard covers
+	// it. RN's own Keyboard events are used rather than react-native-keyboard-
+	// controller because that library does not observe the keyboard inside a
+	// separate Android modal window.
+	useEffect(() => {
+		if (!visible) return;
+		const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+		const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+		const onShow = Keyboard.addListener(showEvent, (event) => {
+			// The sheet already clears the bottom inset, so don't double-count it.
+			const lift = Math.max(0, event.endCoordinates.height - insets.bottom);
+			keyboardOffset.value = withTiming(-lift, { duration });
+		});
+		const onHide = Keyboard.addListener(hideEvent, () => {
+			keyboardOffset.value = withTiming(0, { duration });
+		});
+
+		return () => {
+			onShow.remove();
+			onHide.remove();
+		};
+	}, [visible, insets.bottom, keyboardOffset]);
 
 	const [headerContainerHeight, setHeaderContainerHeight] = useState(0);
 
